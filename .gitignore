@@ -1,0 +1,23 @@
+# Maven
+target/
+
+# Logs
+*.log
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Node (React)
+node_modules/
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# Env files
+.env
