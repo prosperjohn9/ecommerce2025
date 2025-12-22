@@ -6,28 +6,38 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
 function Home() {
   const [products, setProducts] = useState([]);
   const [filter, setFilter] = useState('ALL');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchProducts = async () => {
+      setLoading(true);
+      setError('');
+
       try {
-        const data = await getAllProducts();
-        setProducts(data);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
+        const data = await getAllProducts(filter); // <-- now uses query param
+        if (!cancelled) setProducts(data);
+      } catch (err) {
+        if (!cancelled) setError('Failed to fetch products.');
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
-  
-  const filteredProducts =
-    filter === 'ALL'
-      ? products
-      : products.filter((p) => p.category?.toUpperCase() === filter);
+    return () => {
+      cancelled = true;
+    };
+  }, [filter]);
 
   return (
     <Container sx={{ py: 4 }}>
@@ -55,13 +65,23 @@ function Home() {
         </Button>
       </Stack>
 
-      <Grid container spacing={3}>
-        {filteredProducts.map((product) => (
-          <Grid item key={product.id} xs={12} sm={6} md={4}>
-            <ProductCard product={product} />
-          </Grid>
-        ))}
-      </Grid>
+      {loading && (
+        <Stack alignItems='center' sx={{ py: 6 }}>
+          <CircularProgress />
+        </Stack>
+      )}
+
+      {!loading && error && <Alert severity='error'>{error}</Alert>}
+
+      {!loading && !error && (
+        <Grid container spacing={3}>
+          {products.map((product) => (
+            <Grid item key={product.id} xs={12} sm={6} md={4}>
+              <ProductCard product={product} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </Container>
   );
 }
