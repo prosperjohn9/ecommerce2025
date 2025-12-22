@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import { getAllProducts } from '../api/productAPI';
+import ProductCard from '../components/products/ProductCard';
+
+import Grid from '@mui/material/Grid';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -10,7 +15,7 @@ function Home() {
         const data = await getAllProducts();
         setProducts(data);
       } catch (error) {
-        console.error('Failed to fetch products', error);
+        console.error('Failed to fetch products:', error);
       }
     };
 
@@ -18,14 +23,19 @@ function Home() {
   }, []);
 
   return (
-    <div>
-      <h2>Products</h2>
-      {products.map((p) => (
-        <div key={p.id}>
-          <strong>{p.name}</strong> – ${p.price}
-        </div>
-      ))}
-    </div>
+    <Container sx={{ py: 4 }}>
+      <Typography variant='h4' gutterBottom>
+        Products
+      </Typography>
+
+      <Grid container spacing={3}>
+        {products.map((product) => (
+          <Grid item key={product.id} xs={12} sm={6} md={4}>
+            <ProductCard product={product} />
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
   );
 }
 
