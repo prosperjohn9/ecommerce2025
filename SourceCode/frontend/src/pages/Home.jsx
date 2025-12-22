@@ -45,7 +45,7 @@ function Home() {
         Products
       </Typography>
 
-      <Stack direction='row' spacing={2} sx={{ mb: 3 }}>
+      <Stack direction='row' spacing={2} sx={{ mb: 3 }} justifyContent='center'>
         <Button
           variant={filter === 'ALL' ? 'contained' : 'outlined'}
           onClick={() => setFilter('ALL')}>

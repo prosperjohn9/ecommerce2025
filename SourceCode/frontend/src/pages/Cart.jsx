@@ -45,15 +45,22 @@ function Cart() {
                 <Typography variant='h6'>{item.name}</Typography>
 
                 <Typography variant='body2' color='text.secondary'>
-                  ${Number(item.price).toFixed(2)} × {item.quantity}
+                  ${Number(item.price).toFixed(2)} × {item.quantity} ={' '}
+                  <strong>
+                    ${(Number(item.price) * item.quantity).toFixed(2)}
+                  </strong>
                 </Typography>
 
-                <Stack direction='row' spacing={1}>
+                <Stack direction='row' spacing={1} alignItems='center'>
                   <Button
                     variant='outlined'
                     onClick={() => decreaseQuantity(item.id)}>
                     -
                   </Button>
+
+                  <Typography sx={{ minWidth: 24, textAlign: 'center' }}>
+                    {item.quantity}
+                  </Typography>
 
                   <Button variant='outlined' onClick={() => addToCart(item, 1)}>
                     +
@@ -62,7 +69,8 @@ function Cart() {
                   <Button
                     variant='contained'
                     color='error'
-                    onClick={() => removeFromCart(item.id)}>
+                    onClick={() => removeFromCart(item.id)}
+                    sx={{ ml: 'auto' }}>
                     Remove
                   </Button>
                 </Stack>
