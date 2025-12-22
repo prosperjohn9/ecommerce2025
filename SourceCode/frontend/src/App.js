@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import ProductDetails from './components/products/ProductDetails';
+import Cart from './pages/Cart';
 
 function App() {
   return (
@@ -8,12 +10,8 @@ function App() {
       <Routes>
         <Route path='/' element={<Layout />}>
           <Route index element={<Home />} />
-          {/* Placeholder for product details */}
-          <Route
-            path='products/:id'
-            element={<div>Product Details Page</div>}
-          />
-          {/* 404 page */}
+          <Route path='products/:id' element={<ProductDetails />} />
+          <Route path='cart' element={<Cart />} />
           <Route path='*' element={<div>404 - Page Not Found</div>} />
         </Route>
       </Routes>
