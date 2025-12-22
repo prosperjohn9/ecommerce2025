@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { getAllProducts } from '../api/productAPI';
 import ProductCard from '../components/products/ProductCard';
+
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -23,7 +24,7 @@ function Home() {
       setError('');
 
       try {
-        const data = await getAllProducts(filter); // <-- now uses query param
+        const data = await getAllProducts(filter); // server-side filter via query param
         if (!cancelled) setProducts(data);
       } catch (err) {
         if (!cancelled) setError('Failed to fetch products.');
@@ -40,7 +41,7 @@ function Home() {
   }, [filter]);
 
   return (
-    <Container sx={{ py: 4 }}>
+    <Container maxWidth='xl' sx={{ py: 4 }}>
       <Typography variant='h4' gutterBottom>
         Products
       </Typography>
@@ -74,13 +75,22 @@ function Home() {
       {!loading && error && <Alert severity='error'>{error}</Alert>}
 
       {!loading && !error && (
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 3,
+            // ✅ force consistent columns across filters
+            gridTemplateColumns: {
+              xs: 'repeat(2, minmax(0, 1fr))', // phone: 2
+              md: 'repeat(4, minmax(0, 1fr))', // tablet: 4
+              lg: 'repeat(6, minmax(0, 1fr))', // big screen: 6
+            },
+            alignItems: 'stretch',
+          }}>
           {products.map((product) => (
-            <Grid item key={product.id} xs={12} sm={6} md={4}>
-              <ProductCard product={product} />
-            </Grid>
+            <ProductCard key={product.id} product={product} />
           ))}
-        </Grid>
+        </Box>
       )}
     </Container>
   );

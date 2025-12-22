@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
 import { Link as RouterLink } from 'react-router-dom';
 
 const fallbackImage =
@@ -14,55 +14,87 @@ const fallbackImage =
 function ProductCard({ product }) {
   return (
     <Card
+      elevation={2}
       sx={{
-        height: '100%',
+        width: '100%',
+        height: 380, // ✅ lock height so ALL cards match
         display: 'flex',
         flexDirection: 'column',
         borderRadius: 3,
-        overflow: 'hidden',
-        transition: 'transform 120ms ease, box-shadow 120ms ease',
-        '&:hover': {
-          transform: 'translateY(-3px)',
-          boxShadow: 6,
-        },
-      }}
-      elevation={2}>
+        overflow: 'hidden', // ✅ prevents any inner overflow affecting size
+      }}>
+      {/* ✅ Fixed image area */}
       <CardMedia
         component='img'
-        height='190'
         image={product?.imageUrl || fallbackImage}
-        alt={product?.name || 'Product'}
-        loading='lazy'
-        onError={(e) => {
-          e.currentTarget.src = fallbackImage;
+        alt={product?.name || 'Product image'}
+        sx={{
+          height: 200, // ✅ fixed image height
+          width: '100%',
+          objectFit: 'cover',
+          flexShrink: 0,
         }}
       />
 
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Stack direction='row' spacing={1} sx={{ mb: 1 }}>
-          {product?.category && (
-            <Chip size='small' label={product.category} variant='outlined' />
-          )}
-        </Stack>
+      {/* ✅ Content area takes remaining space */}
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          py: 1.5,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+        }}>
+        {product?.category && (
+          <Chip
+            label={product.category}
+            size='small'
+            sx={{ width: 'fit-content' }}
+          />
+        )}
 
-        <Typography variant='h6' sx={{ lineHeight: 1.2 }} gutterBottom noWrap>
+        {/* ✅ Title: 2-line clamp + consistent height */}
+        <Typography
+          variant='h6'
+          sx={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            lineHeight: 1.2,
+            minHeight: '2.4em', // ✅ reserves 2 lines always
+          }}>
           {product?.name}
         </Typography>
 
-        <Typography variant='body2' color='text.secondary'>
+        <Typography
+          variant='body2'
+          color='text.secondary'
+          sx={{ fontWeight: 600 }}>
           ${Number(product?.price || 0).toFixed(2)}
         </Typography>
+
+        {/* ✅ spacer so button area stays consistent even if content changes */}
+        <div style={{ flexGrow: 1 }} />
       </CardContent>
 
-      <CardActions sx={{ p: 2, pt: 0 }}>
-        <Button
-          size='small'
-          variant='contained'
-          fullWidth
-          component={RouterLink}
-          to={`/products/${product?.id}`}>
-          View Details
-        </Button>
+      {/* ✅ Actions pinned to bottom */}
+      <CardActions
+        sx={{ p: 2, pt: 1, pb: 3, minHeight: 64, alignItems: 'flex-end' }}>
+        <Box sx={{ width: '100%', mb: 1 }}>
+          {/* ✅ mb creates visible gap */}
+          <Button
+            fullWidth
+            variant='contained'
+            component={RouterLink}
+            to={`/products/${product.id}`}
+            sx={{
+              py: 1,
+              borderRadius: 2,
+            }}>
+            View Details
+          </Button>
+        </Box>
       </CardActions>
     </Card>
   );
