@@ -5,7 +5,7 @@ const CartContext = createContext(null);
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
 
-  // ✅ Add to cart (default quantity = 1)
+  // Add to cart (default quantity = 1)
   const addToCart = (product, quantity = 1) => {
     if (!product || product.id == null) return;
 
@@ -26,7 +26,7 @@ export function CartProvider({ children }) {
     });
   };
 
-  // ✅ Decrease quantity by 1 (if becomes 0 -> remove)
+  // Decrease quantity by 1 (if becomes 0 -> remove)
   const decreaseQuantity = (productId) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === productId);
@@ -42,17 +42,17 @@ export function CartProvider({ children }) {
     });
   };
 
-  // ✅ Remove item completely
+  // Remove item completely
   const removeFromCart = (productId) => {
     setCartItems((prev) => prev.filter((item) => item.id !== productId));
   };
 
-  // ✅ Clear cart
+  // Clear cart
   const clearCart = () => {
     setCartItems([]);
   };
 
-  // ✅ Derived totals
+  // Derived totals
   const cartCount = useMemo(
     () => cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0),
     [cartItems]

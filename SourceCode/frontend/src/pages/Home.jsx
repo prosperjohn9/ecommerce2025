@@ -79,7 +79,7 @@ function Home() {
           sx={{
             display: 'grid',
             gap: 3,
-            // ✅ force consistent columns across filters
+            // Force consistent columns across filters
             gridTemplateColumns: {
               xs: 'repeat(2, minmax(0, 1fr))', // phone: 2
               md: 'repeat(4, minmax(0, 1fr))', // tablet: 4

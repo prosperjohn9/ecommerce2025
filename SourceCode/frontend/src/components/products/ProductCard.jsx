@@ -17,26 +17,26 @@ function ProductCard({ product }) {
       elevation={2}
       sx={{
         width: '100%',
-        height: 380, // ✅ lock height so ALL cards match
+        height: 380, // Lock height so ALL cards match
         display: 'flex',
         flexDirection: 'column',
         borderRadius: 3,
-        overflow: 'hidden', // ✅ prevents any inner overflow affecting size
+        overflow: 'hidden', // Prevents any inner overflow affecting size
       }}>
-      {/* ✅ Fixed image area */}
+      {/* Fixed image area */}
       <CardMedia
         component='img'
         image={product?.imageUrl || fallbackImage}
         alt={product?.name || 'Product image'}
         sx={{
-          height: 200, // ✅ fixed image height
+          height: 200, // Fixed image height
           width: '100%',
           objectFit: 'cover',
           flexShrink: 0,
         }}
       />
 
-      {/* ✅ Content area takes remaining space */}
+      {/* Content area takes remaining space */}
       <CardContent
         sx={{
           flexGrow: 1,
@@ -53,7 +53,7 @@ function ProductCard({ product }) {
           />
         )}
 
-        {/* ✅ Title: 2-line clamp + consistent height */}
+        {/* Title: 2-line clamp + consistent height */}
         <Typography
           variant='h6'
           sx={{
@@ -62,7 +62,7 @@ function ProductCard({ product }) {
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             lineHeight: 1.2,
-            minHeight: '2.4em', // ✅ reserves 2 lines always
+            minHeight: '2.4em', // Reserves 2 lines always
           }}>
           {product?.name}
         </Typography>
@@ -74,15 +74,15 @@ function ProductCard({ product }) {
           ${Number(product?.price || 0).toFixed(2)}
         </Typography>
 
-        {/* ✅ spacer so button area stays consistent even if content changes */}
+        {/* Spacer so button area stays consistent even if content changes */}
         <div style={{ flexGrow: 1 }} />
       </CardContent>
 
-      {/* ✅ Actions pinned to bottom */}
+      {/* Actions pinned to bottom */}
       <CardActions
         sx={{ p: 2, pt: 1, pb: 3, minHeight: 64, alignItems: 'flex-end' }}>
         <Box sx={{ width: '100%', mb: 1 }}>
-          {/* ✅ mb creates visible gap */}
+          {/* mb creates visible gap */}
           <Button
             fullWidth
             variant='contained'

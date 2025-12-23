@@ -32,7 +32,7 @@ public class Product {
 
     public Product() {}
 
-    // Getters & setters (Lombok can replace these)
+    // Getters & setters 
 
     public Long getId() {
         return id;
