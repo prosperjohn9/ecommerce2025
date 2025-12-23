@@ -1,33 +1,78 @@
-INSERT INTO products (name, description, price, category, brand, color, size, stock, image_url)
-VALUES
--- Bags
-('Classic Leather Tote',
- 'Timeless leather tote bag suitable for everyday use.',
- 79.99, 'BAG', 'ChicLine', 'Brown', 'One Size', 15,
- 'https://example.com/images/bag1.jpg'),
-
-('Black Crossbody Bag',
- 'Compact crossbody bag with adjustable strap.',
- 49.90, 'BAG', 'UrbanStyle', 'Black', 'One Size', 20,
- 'https://example.com/images/bag2.jpg'),
-
-('Mini Shoulder Bag',
- 'Trendy mini shoulder bag for nights out.',
- 39.50, 'BAG', 'NightOut', 'Beige', 'One Size', 10,
- 'https://example.com/images/bag3.jpg'),
-
--- Shoes
-('White Sneakers',
- 'Comfortable everyday sneakers with cushioned sole.',
- 59.99, 'SHOE', 'StreetWalk', 'White', '39', 25,
- 'https://example.com/images/shoe1.jpg'),
-
-('Black Ankle Boots',
- 'Stylish ankle boots with low heel.',
- 89.00, 'SHOE', 'CityStep', 'Black', '38', 12,
- 'https://example.com/images/shoe2.jpg'),
-
-('Running Shoes',
- 'Lightweight running shoes with breathable material.',
- 69.99, 'SHOE', 'SpeedRun', 'Blue', '40', 18,
- 'https://example.com/images/shoe3.jpg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (1, 'Chel Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the Chel Shoes collection.', '/images/chel_shoes/black_chel.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (2, 'Chel Shoes (Oxblood)', 69.99, 'SHOE', 'Premium shoe from the Chel Shoes collection.', '/images/chel_shoes/oxblood_chel.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (3, 'Chel Shoes (Red)', 69.99, 'SHOE', 'Premium shoe from the Chel Shoes collection.', '/images/chel_shoes/red_chel_leg.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (4, 'Coach Bag Coach1', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach1.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (5, 'Coach Bag Coach2', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach2.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (6, 'Coach Bag Coach3', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach3.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (7, 'Coach Bag Coach4', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach4.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (8, 'Coach Bag Coach5', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach5.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (9, 'Coach Bag Coach6', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach6.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (10, 'Coach Bag Coach7', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach7.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (11, 'Coach Bag Coach8', 89.99, 'BAG', 'Premium bag from the Coach Bag collection.', '/images/coach_bag/coach8.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (12, 'Hermes (Black)', 89.99, 'BAG', 'Premium bag from the Hermes collection.', '/images/hermes/hermes_black.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (13, 'Hermes (Brown)', 89.99, 'BAG', 'Premium bag from the Hermes collection.', '/images/hermes/hermes_brown.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (14, 'Hermes (Green)', 89.99, 'BAG', 'Premium bag from the Hermes collection.', '/images/hermes/hermes_green.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (15, 'Hermes (Pink)', 89.99, 'BAG', 'Premium bag from the Hermes collection.', '/images/hermes/hermes_pink.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (16, 'Hermes (Red)', 89.99, 'BAG', 'Premium bag from the Hermes collection.', '/images/hermes/hermes_red.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (17, 'Hermes (White)', 89.99, 'BAG', 'Premium bag from the Hermes collection.', '/images/hermes/hermes_white.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (18, 'Limited Shoes Limited1', 69.99, 'SHOE', 'Premium shoe from the Limited Shoes collection.', '/images/limited_shoes/limited1.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (19, 'Limited Shoes Limited2', 69.99, 'SHOE', 'Premium shoe from the Limited Shoes collection.', '/images/limited_shoes/limited2.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (20, 'Limited Shoes Limited3', 69.99, 'SHOE', 'Premium shoe from the Limited Shoes collection.', '/images/limited_shoes/limited3.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (21, 'Limited Shoes Limited4', 69.99, 'SHOE', 'Premium shoe from the Limited Shoes collection.', '/images/limited_shoes/limited4.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (22, 'Limited Shoes Limited5', 69.99, 'SHOE', 'Premium shoe from the Limited Shoes collection.', '/images/limited_shoes/limited5.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (23, 'Limited Shoes Limited6', 69.99, 'SHOE', 'Premium shoe from the Limited Shoes collection.', '/images/limited_shoes/limited6.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (24, 'Limited Shoes Limited7', 69.99, 'SHOE', 'Premium shoe from the Limited Shoes collection.', '/images/limited_shoes/limited7.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (25, 'Loafers (Black)', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/black_loafer_2.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (26, 'Loafers (Black)', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/black_loafers.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (27, 'Loafers (Black)', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/black_loafers_3.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (28, 'Loafers (Black)', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/black_loafers_chain.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (29, 'Loafers (Black)', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/black_loafers_pearl.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (30, 'Loafers Cream Color Loafer', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/cream_color_loafer.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (31, 'Loafers (Red)', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/red_loafers.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (32, 'Loafers (White)', 69.99, 'SHOE', 'Premium shoe from the Loafers collection.', '/images/loafers/white_loafers.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (33, 'Long Bag (Black)', 89.99, 'BAG', 'Premium bag from the Long Bag collection.', '/images/long_bag/long_black.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (34, 'Long Bag (Brown)', 89.99, 'BAG', 'Premium bag from the Long Bag collection.', '/images/long_bag/long_brown.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (35, 'Long Bag (Green)', 89.99, 'BAG', 'Premium bag from the Long Bag collection.', '/images/long_bag/long_green.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (36, 'Long Bag (Pink)', 89.99, 'BAG', 'Premium bag from the Long Bag collection.', '/images/long_bag/long_pink.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (37, 'Long Bag (Red)', 89.99, 'BAG', 'Premium bag from the Long Bag collection.', '/images/long_bag/long_red.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (38, 'Norm Bags Norm1', 89.99, 'BAG', 'Premium bag from the Norm Bags collection.', '/images/norm_bags/norm1.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (39, 'Norm Bags Norm2', 89.99, 'BAG', 'Premium bag from the Norm Bags collection.', '/images/norm_bags/norm2.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (40, 'Saint Bags Saint1', 89.99, 'BAG', 'Premium bag from the Saint Bags collection.', '/images/saint_bags/saint1.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (41, 'Saint Bags Saint2', 89.99, 'BAG', 'Premium bag from the Saint Bags collection.', '/images/saint_bags/saint2.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (42, 'Saint Bags Saint3', 89.99, 'BAG', 'Premium bag from the Saint Bags collection.', '/images/saint_bags/saint3.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (43, 'Saint Bags Saint4', 89.99, 'BAG', 'Premium bag from the Saint Bags collection.', '/images/saint_bags/saint4.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (44, 'Saint Bags Saint5', 89.99, 'BAG', 'Premium bag from the Saint Bags collection.', '/images/saint_bags/saint5.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (45, 'Sandal Heels Gold Sandal Heel', 69.99, 'SHOE', 'Premium shoe from the Sandal Heels collection.', '/images/sandal_heels/gold_sandal_heel.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (46, 'Sandal Heels Gold Sandal Heel 2', 69.99, 'SHOE', 'Premium shoe from the Sandal Heels collection.', '/images/sandal_heels/gold_sandal_heel_2.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (47, 'Sandal Heels (Pink)', 69.99, 'SHOE', 'Premium shoe from the Sandal Heels collection.', '/images/sandal_heels/pink_sandal_heel.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (48, 'Sandal Heels (Red)', 69.99, 'SHOE', 'Premium shoe from the Sandal Heels collection.', '/images/sandal_heels/red_sandal_heels.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (49, 'Sandal Heels Silver Sandal Heels', 69.99, 'SHOE', 'Premium shoe from the Sandal Heels collection.', '/images/sandal_heels/silver_sandal_heels.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (50, 'Skin Bags 1', 89.99, 'BAG', 'Premium bag from the Skin Bags collection.', '/images/skin_bags/1.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (51, 'Skin Bags 2', 89.99, 'BAG', 'Premium bag from the Skin Bags collection.', '/images/skin_bags/2.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (52, 'Skin Bags 3', 89.99, 'BAG', 'Premium bag from the Skin Bags collection.', '/images/skin_bags/3.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (53, 'Skin Bags 4', 89.99, 'BAG', 'Premium bag from the Skin Bags collection.', '/images/skin_bags/4.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (54, 'Skin Bags 5', 89.99, 'BAG', 'Premium bag from the Skin Bags collection.', '/images/skin_bags/5.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (55, 'Slip Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the Slip Shoes collection.', '/images/slip_shoes/slip_black.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (56, 'Slip Shoes (Brown)', 69.99, 'SHOE', 'Premium shoe from the Slip Shoes collection.', '/images/slip_shoes/slip_brown.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (57, 'Slip Shoes Slip Nude', 69.99, 'SHOE', 'Premium shoe from the Slip Shoes collection.', '/images/slip_shoes/slip_nude.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (58, 'Slip Shoes (Pink)', 69.99, 'SHOE', 'Premium shoe from the Slip Shoes collection.', '/images/slip_shoes/slip_pink.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (59, 'Sliper Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the Sliper Shoes collection.', '/images/sliper_shoes/black_slipper_shoe.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (60, 'Sliper Shoes (Brown)', 69.99, 'SHOE', 'Premium shoe from the Sliper Shoes collection.', '/images/sliper_shoes/brown_slipper_shoe.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (61, 'Stilettos (Black)', 69.99, 'SHOE', 'Premium shoe from the Stilettos collection.', '/images/stilettos/black_stil.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (62, 'Stilettos (Black)', 69.99, 'SHOE', 'Premium shoe from the Stilettos collection.', '/images/stilettos/black_stil_leg.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (63, 'Stilettos (Brown)', 69.99, 'SHOE', 'Premium shoe from the Stilettos collection.', '/images/stilettos/brown_stil.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (64, 'Stilettos (Brown)', 69.99, 'SHOE', 'Premium shoe from the Stilettos collection.', '/images/stilettos/brown_stil_leg.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (65, 'Stilettos (White)', 69.99, 'SHOE', 'Premium shoe from the Stilettos collection.', '/images/stilettos/white_stil.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (66, 'Stilettos (White)', 69.99, 'SHOE', 'Premium shoe from the Stilettos collection.', '/images/stilettos/white_stil_leg.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (67, 'Summer Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the Summer Shoes collection.', '/images/summer_shoes/summer_black.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (68, 'Summer Shoes (Blue)', 69.99, 'SHOE', 'Premium shoe from the Summer Shoes collection.', '/images/summer_shoes/summer_blue.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (69, 'Summer Shoes (Green)', 69.99, 'SHOE', 'Premium shoe from the Summer Shoes collection.', '/images/summer_shoes/summer_green.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (70, 'Summer Shoes Summer Nude', 69.99, 'SHOE', 'Premium shoe from the Summer Shoes collection.', '/images/summer_shoes/summer_nude.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (71, 'Summer Shoes (White)', 69.99, 'SHOE', 'Premium shoe from the Summer Shoes collection.', '/images/summer_shoes/summer_white.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (72, 'V Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the V Shoes collection.', '/images/v_shoes/black_blok.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (73, 'V Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the V Shoes collection.', '/images/v_shoes/black_blok_leg.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (74, 'V Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the V Shoes collection.', '/images/v_shoes/v_black.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (75, 'V Shoes (Black)', 69.99, 'SHOE', 'Premium shoe from the V Shoes collection.', '/images/v_shoes/v_black_with_leg.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (76, 'V Shoes (Pink)', 69.99, 'SHOE', 'Premium shoe from the V Shoes collection.', '/images/v_shoes/v_pink_with_leg.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (77, 'V Shoes (White)', 69.99, 'SHOE', 'Premium shoe from the V Shoes collection.', '/images/v_shoes/white_blok.jpeg');
+INSERT INTO product (id, name, price, category, description, image_url) VALUES (78, 'V Shoes (White)', 69.99, 'SHOE', 'Premium shoe from the V Shoes collection.', '/images/v_shoes/white_blok_leg.jpeg');
