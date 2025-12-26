@@ -1,204 +1,211 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Box from '@mui/material/Box';
+
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+import { keyframes } from '@mui/system';
+
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
-import Container from '@mui/material/Container';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Radio from '@mui/material/Radio';
-import Alert from '@mui/material/Alert';
+/* ---------------------------
+   Confetti (lightweight CSS)
+---------------------------- */
+const fall = keyframes`
+  0%   { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translateY(320px) rotate(720deg); opacity: 0; }
+`;
+
+function ConfettiBurst({ active }) {
+  // Stable pieces so it doesn’t re-randomize on rerender
+  const pieces = useMemo(() => {
+    const colors = [
+      '#8b5cf6',
+      '#22c55e',
+      '#eab308',
+      '#06b6d4',
+      '#ef4444',
+      '#111827',
+    ];
+    return Array.from({ length: 24 }).map((_, i) => {
+      const left = Math.random() * 100;
+      const delay = Math.random() * 0.35;
+      const duration = 1.2 + Math.random() * 0.6;
+      const size = 6 + Math.random() * 6;
+      const bg = colors[i % colors.length];
+      return { left, delay, duration, size, bg, i };
+    });
+  }, []);
+
+  if (!active) return null;
+
+  return (
+    <Box
+      sx={{
+        pointerEvents: 'none',
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
+      }}>
+      {pieces.map((p) => (
+        <Box
+          key={p.i}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: `${p.left}%`,
+            width: p.size,
+            height: p.size * 0.6,
+            borderRadius: 1,
+            backgroundColor: p.bg,
+            animation: `${fall} ${p.duration}s ease-out ${p.delay}s forwards`,
+          }}
+        />
+      ))}
+    </Box>
+  );
+}
 
 function Checkout() {
   const navigate = useNavigate();
-  const { cartItems, cartTotal, cartCount, clearCart } = useCart();
+  const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
 
-  // ✅ Guards (10.5)
-  useEffect(() => {
-    if (!cartItems || cartItems.length === 0) navigate('/', { replace: true });
-    else if (!user) navigate('/login', { replace: true });
-  }, [cartItems, user, navigate]);
+  const [paymentMethod, setPaymentMethod] = useState('CARD');
 
-  const [shipping, setShipping] = useState({
-    fullName: user?.username || '',
+  const [form, setForm] = useState({
+    fullName: '',
     phone: '',
     address: '',
     city: '',
-    country: 'Türkiye',
+    country: '',
   });
 
-  const [payment, setPayment] = useState('CARD');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const subtotal = useMemo(() => Number(cartTotal || 0), [cartTotal]);
-  const shippingFee = useMemo(() => (subtotal > 0 ? 0 : 0), [subtotal]); // keep 0 for now
-  const total = useMemo(() => subtotal + shippingFee, [subtotal, shippingFee]);
+  // order modal state
+  const [orderInfo, setOrderInfo] = useState({ orderId: '', placedAt: '' });
+  const [expandedSummary, setExpandedSummary] = useState(false);
 
-  const canPlaceOrder = useMemo(() => {
-    return (
-      shipping.fullName.trim().length >= 3 &&
-      shipping.phone.trim().length >= 7 &&
-      shipping.address.trim().length >= 5 &&
-      shipping.city.trim().length >= 2 &&
-      shipping.country.trim().length >= 2 &&
-      cartCount > 0
-    );
-  }, [shipping, cartCount]);
+  // countdown
+  const COUNTDOWN_START = 20;
+  const [countdown, setCountdown] = useState(COUNTDOWN_START);
 
-  const onPlaceOrder = () => {
-    setError('');
-    if (!canPlaceOrder) {
-      setError('Please fill all shipping fields correctly.');
-      return;
-    }
+  // guards
+  useEffect(() => {
+    if (cartItems.length === 0) navigate('/');
+    if (!user) navigate('/login');
+  }, [cartItems, user, navigate]);
 
-    // UI-only “success”
-    setSuccess(true);
-    clearCart();
-
-    setTimeout(() => {
-      navigate('/', { replace: true });
-    }, 1200);
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setErrors((prev) => ({ ...prev, [e.target.name]: '' }));
   };
 
-  if (!cartItems || cartItems.length === 0) return null; // guard safety
-  if (!user) return null;
+  const validate = () => {
+    const next = {};
+    if (!form.fullName.trim()) next.fullName = 'Full name is required';
+    if (!form.phone.trim()) next.phone = 'Phone is required';
+    if (!form.address.trim()) next.address = 'Address is required';
+    if (!form.city.trim()) next.city = 'City is required';
+    if (!form.country.trim()) next.country = 'Country is required';
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handlePlaceOrder = () => {
+    if (!validate()) return;
+
+    const id = `CBU-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const ts = new Date().toLocaleString();
+
+    setOrderInfo({ orderId: id, placedAt: ts });
+    setExpandedSummary(false);
+    setCountdown(COUNTDOWN_START);
+    setConfirmOpen(true);
+
+    // ✅ IMPORTANT: Do NOT clear cart here anymore
+  };
+
+  const handleCloseModal = () => {
+    // allow closing without clearing
+    setConfirmOpen(false);
+  };
+
+  const handleContinueShopping = () => {
+    // ✅ clear only on continue
+    clearCart();
+    setConfirmOpen(false);
+    navigate('/');
+  };
+
+  // ✅ auto-close countdown → continue shopping
+  useEffect(() => {
+    if (!confirmOpen) return;
+
+    const t = setInterval(() => {
+      setCountdown((c) => c - 1);
+    }, 1000);
+
+    return () => clearInterval(t);
+  }, [confirmOpen]);
+
+  useEffect(() => {
+    if (!confirmOpen) return;
+    if (countdown <= 0) {
+      handleContinueShopping();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown, confirmOpen]);
 
   return (
-    <Container maxWidth='lg' sx={{ py: 4 }}>
-      <Typography variant='h4' gutterBottom sx={{ fontWeight: 900 }}>
+    <Container maxWidth='md' sx={{ py: 4 }}>
+      <Typography variant='h4' sx={{ fontWeight: 900, mb: 3 }}>
         Checkout
       </Typography>
 
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={3}
-        alignItems='flex-start'>
-        {/* Left: Shipping + Payment */}
-        <Paper sx={{ p: 3, flex: 1, width: '100%' }}>
-          <Typography variant='h6' sx={{ fontWeight: 900 }} gutterBottom>
-            Shipping details
-          </Typography>
-
-          <Stack spacing={2}>
-            <TextField
-              label='Full name'
-              value={shipping.fullName}
-              onChange={(e) =>
-                setShipping((s) => ({ ...s, fullName: e.target.value }))
-              }
-              fullWidth
-            />
-
-            <TextField
-              label='Phone'
-              value={shipping.phone}
-              onChange={(e) =>
-                setShipping((s) => ({ ...s, phone: e.target.value }))
-              }
-              fullWidth
-            />
-
-            <TextField
-              label='Address'
-              value={shipping.address}
-              onChange={(e) =>
-                setShipping((s) => ({ ...s, address: e.target.value }))
-              }
-              fullWidth
-              multiline
-              minRows={2}
-            />
-
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
-                label='City'
-                value={shipping.city}
-                onChange={(e) =>
-                  setShipping((s) => ({ ...s, city: e.target.value }))
-                }
-                fullWidth
-              />
-              <TextField
-                label='Country'
-                value={shipping.country}
-                onChange={(e) =>
-                  setShipping((s) => ({ ...s, country: e.target.value }))
-                }
-                fullWidth
-              />
-            </Stack>
-          </Stack>
-
-          <Divider sx={{ my: 3 }} />
-
-          <Typography variant='h6' sx={{ fontWeight: 900 }} gutterBottom>
-            Payment
-          </Typography>
-
-          <RadioGroup
-            value={payment}
-            onChange={(e) => setPayment(e.target.value)}>
-            <FormControlLabel value='CARD' control={<Radio />} label='Card' />
-            <FormControlLabel
-              value='COD'
-              control={<Radio />}
-              label='Cash on Delivery'
-            />
-          </RadioGroup>
-
-          {error && (
-            <Alert severity='error' sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert severity='success' sx={{ mt: 2 }}>
-              Order placed successfully! Redirecting…
-            </Alert>
-          )}
-        </Paper>
-
-        {/* Right: Order Summary */}
-        <Paper
-          sx={{
-            p: 3,
-            width: { xs: '100%', md: 380 },
-            position: 'sticky',
-            top: 90,
-          }}>
-          <Typography variant='h6' sx={{ fontWeight: 900 }} gutterBottom>
+      <Stack spacing={3}>
+        {/* Order Summary */}
+        <Paper sx={{ p: 3 }}>
+          <Typography variant='h6' sx={{ fontWeight: 900, mb: 2 }}>
             Order Summary
           </Typography>
 
-          <Stack spacing={1.5} sx={{ mb: 2 }}>
+          <Stack spacing={1}>
             {cartItems.map((item) => (
               <Stack
                 key={item.id}
                 direction='row'
-                justifyContent='space-between'
-                alignItems='flex-start'
-                spacing={2}>
-                <Stack sx={{ minWidth: 0 }}>
-                  <Typography sx={{ fontWeight: 800 }} noWrap>
-                    {item.name}
-                  </Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    Qty: {item.quantity} • ${Number(item.price).toFixed(2)}
-                  </Typography>
-                </Stack>
-
-                <Typography sx={{ fontWeight: 900 }}>
-                  ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                justifyContent='space-between'>
+                <Typography variant='body2'>
+                  {item.name} × {item.quantity}
+                </Typography>
+                <Typography variant='body2' fontWeight={700}>
+                  ${(item.price * item.quantity).toFixed(2)}
                 </Typography>
               </Stack>
             ))}
@@ -206,49 +213,226 @@ function Checkout() {
 
           <Divider sx={{ my: 2 }} />
 
-          <Stack spacing={1}>
-            <Stack direction='row' justifyContent='space-between'>
-              <Typography color='text.secondary'>Subtotal</Typography>
-              <Typography sx={{ fontWeight: 900 }}>
-                ${subtotal.toFixed(2)}
-              </Typography>
-            </Stack>
+          <Stack direction='row' justifyContent='space-between'>
+            <Typography variant='h6' fontWeight={900}>
+              Total
+            </Typography>
+            <Typography variant='h6' fontWeight={900}>
+              ${Number(cartTotal).toFixed(2)}
+            </Typography>
+          </Stack>
+        </Paper>
 
-            <Stack direction='row' justifyContent='space-between'>
-              <Typography color='text.secondary'>Shipping</Typography>
-              <Typography sx={{ fontWeight: 900 }}>
-                {shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`}
-              </Typography>
-            </Stack>
+        {/* Shipping */}
+        <Paper sx={{ p: 3 }}>
+          <Typography variant='h6' sx={{ fontWeight: 900, mb: 2 }}>
+            Shipping Information
+          </Typography>
 
-            <Stack direction='row' justifyContent='space-between'>
-              <Typography sx={{ fontWeight: 900 }}>Total</Typography>
-              <Typography sx={{ fontWeight: 900 }}>
-                ${total.toFixed(2)}
-              </Typography>
+          <Stack spacing={2}>
+            <TextField
+              label='Full Name'
+              name='fullName'
+              value={form.fullName}
+              onChange={handleChange}
+              fullWidth
+              error={!!errors.fullName}
+              helperText={errors.fullName}
+            />
+            <TextField
+              label='Phone Number'
+              name='phone'
+              value={form.phone}
+              onChange={handleChange}
+              fullWidth
+              error={!!errors.phone}
+              helperText={errors.phone}
+            />
+            <TextField
+              label='Address'
+              name='address'
+              value={form.address}
+              onChange={handleChange}
+              fullWidth
+              error={!!errors.address}
+              helperText={errors.address}
+            />
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField
+                label='City'
+                name='city'
+                value={form.city}
+                onChange={handleChange}
+                fullWidth
+                error={!!errors.city}
+                helperText={errors.city}
+              />
+              <TextField
+                label='Country'
+                name='country'
+                value={form.country}
+                onChange={handleChange}
+                fullWidth
+                error={!!errors.country}
+                helperText={errors.country}
+              />
             </Stack>
           </Stack>
+        </Paper>
 
+        {/* Payment */}
+        <Paper sx={{ p: 3 }}>
+          <Typography variant='h6' sx={{ fontWeight: 900, mb: 2 }}>
+            Payment Method
+          </Typography>
+
+          <RadioGroup
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}>
+            <FormControlLabel
+              value='CARD'
+              control={<Radio />}
+              label='Credit / Debit Card'
+            />
+            <FormControlLabel
+              value='COD'
+              control={<Radio />}
+              label='Cash on Delivery'
+            />
+          </RadioGroup>
+        </Paper>
+
+        {/* Place Order */}
+        <Box>
           <Button
             variant='contained'
             size='large'
             fullWidth
-            sx={{ mt: 2 }}
-            onClick={onPlaceOrder}
-            disabled={!canPlaceOrder || success}>
+            onClick={handlePlaceOrder}>
             Place Order
           </Button>
 
-          <Button
-            component={RouterLink}
-            to='/cart'
-            variant='text'
-            fullWidth
-            sx={{ mt: 1 }}>
-            Back to Cart
-          </Button>
-        </Paper>
+          <Typography
+            variant='caption'
+            color='text.secondary'
+            sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
+            Demo checkout — no real payment is processed.
+          </Typography>
+        </Box>
       </Stack>
+
+      {/* Confirmation Modal */}
+      <Dialog
+        open={confirmOpen}
+        onClose={handleCloseModal}
+        fullWidth
+        maxWidth='sm'>
+        <Box sx={{ position: 'relative' }}>
+          <ConfettiBurst active={confirmOpen} />
+
+          <DialogTitle sx={{ fontWeight: 900 }}>
+            <Stack direction='row' spacing={1.5} alignItems='center'>
+              <CheckCircleIcon />
+              <span>Order Confirmed</span>
+            </Stack>
+          </DialogTitle>
+
+          <DialogContent>
+            <Typography sx={{ mb: 1.5 }}>
+              Thanks, <strong>{user?.name}</strong> — your order has been placed
+              successfully.
+            </Typography>
+
+            <Paper variant='outlined' sx={{ p: 2, borderRadius: 3, mb: 2 }}>
+              <Stack spacing={0.75}>
+                <Typography variant='body2' color='text.secondary'>
+                  Order ID
+                </Typography>
+                <Typography fontWeight={900}>{orderInfo.orderId}</Typography>
+
+                <Divider sx={{ my: 1 }} />
+
+                <Typography variant='body2' color='text.secondary'>
+                  Placed at
+                </Typography>
+                <Typography fontWeight={700}>{orderInfo.placedAt}</Typography>
+
+                <Divider sx={{ my: 1 }} />
+
+                <Typography variant='body2' color='text.secondary'>
+                  Total
+                </Typography>
+                <Typography fontWeight={900}>
+                  ${Number(cartTotal).toFixed(2)}
+                </Typography>
+
+                <Typography
+                  variant='body2'
+                  color='text.secondary'
+                  sx={{ mt: 1 }}>
+                  Payment method:{' '}
+                  <strong>
+                    {paymentMethod === 'CARD' ? 'Card' : 'Cash on Delivery'}
+                  </strong>
+                </Typography>
+              </Stack>
+            </Paper>
+
+            {/* Collapsible order items */}
+            <Accordion
+              expanded={expandedSummary}
+              onChange={() => setExpandedSummary((p) => !p)}
+              disableGutters
+              sx={{ borderRadius: 3, overflow: 'hidden' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography fontWeight={900}>View order summary</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack spacing={1}>
+                  {cartItems.map((item) => (
+                    <Stack
+                      key={item.id}
+                      direction='row'
+                      justifyContent='space-between'
+                      alignItems='flex-start'
+                      spacing={2}>
+                      <Typography variant='body2' sx={{ flex: 1 }}>
+                        {item.name} × {item.quantity}
+                      </Typography>
+                      <Typography variant='body2' fontWeight={800}>
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </Typography>
+                    </Stack>
+                  ))}
+                  <Divider />
+                  <Stack direction='row' justifyContent='space-between'>
+                    <Typography fontWeight={900}>Total</Typography>
+                    <Typography fontWeight={900}>
+                      ${Number(cartTotal).toFixed(2)}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+
+            <Typography
+              variant='caption'
+              color='text.secondary'
+              sx={{ display: 'block', mt: 2 }}>
+              Auto-continuing in {countdown}s…
+            </Typography>
+          </DialogContent>
+
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={handleCloseModal} variant='outlined'>
+              Close
+            </Button>
+            <Button onClick={handleContinueShopping} variant='contained'>
+              Continue shopping ({countdown}s)
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
     </Container>
   );
 }
