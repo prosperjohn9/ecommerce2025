@@ -4,7 +4,9 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import Box from '@mui/material/Box';
 
+import { Link as RouterLink } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 function Cart() {
@@ -24,7 +26,9 @@ function Cart() {
         justifyContent='space-between'
         alignItems='center'
         sx={{ mb: 2 }}>
-        <Typography variant='h4'>Cart</Typography>
+        <Typography variant='h4' sx={{ fontWeight: 900 }}>
+          Cart
+        </Typography>
 
         <Button
           variant='outlined'
@@ -42,7 +46,9 @@ function Cart() {
           {cartItems.map((item) => (
             <Paper key={item.id} sx={{ p: 2 }}>
               <Stack spacing={1}>
-                <Typography variant='h6'>{item.name}</Typography>
+                <Typography variant='h6' sx={{ fontWeight: 900 }}>
+                  {item.name}
+                </Typography>
 
                 <Typography variant='body2' color='text.secondary'>
                   ${Number(item.price).toFixed(2)} × {item.quantity} ={' '}
@@ -58,7 +64,8 @@ function Cart() {
                     -
                   </Button>
 
-                  <Typography sx={{ minWidth: 24, textAlign: 'center' }}>
+                  <Typography
+                    sx={{ minWidth: 24, textAlign: 'center', fontWeight: 800 }}>
                     {item.quantity}
                   </Typography>
 
@@ -80,9 +87,40 @@ function Cart() {
 
           <Divider />
 
-          <Typography variant='h5'>
-            Total: ${Number(cartTotal).toFixed(2)}
-          </Typography>
+          {/* ✅ Summary + Checkout */}
+          <Paper sx={{ p: 2 }}>
+            <Stack spacing={2}>
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'>
+                <Typography variant='h6' sx={{ fontWeight: 900 }}>
+                  Total
+                </Typography>
+                <Typography variant='h6' sx={{ fontWeight: 900 }}>
+                  ${Number(cartTotal).toFixed(2)}
+                </Typography>
+              </Stack>
+
+              <Box>
+                <Button
+                  component={RouterLink}
+                  to='/checkout'
+                  variant='contained'
+                  size='large'
+                  fullWidth>
+                  Checkout
+                </Button>
+
+                <Typography
+                  variant='caption'
+                  color='text.secondary'
+                  sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
+                  You’ll enter shipping + payment details on the next page.
+                </Typography>
+              </Box>
+            </Stack>
+          </Paper>
         </Stack>
       )}
     </Container>

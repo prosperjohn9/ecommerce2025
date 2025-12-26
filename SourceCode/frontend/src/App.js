@@ -5,6 +5,7 @@ import ProductDetails from './components/products/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Checkout from './pages/Checkout';
 
 function App() {
   return (
@@ -18,6 +19,9 @@ function App() {
           {/* ✅ Auth routes */}
           <Route path='login' element={<Login />} />
           <Route path='signup' element={<Signup />} />
+
+          {/* ✅ Checkout */}
+          <Route path='checkout' element={<Checkout />} />
 
           {/* ✅ 404 */}
           <Route path='*' element={<div>404 - Page Not Found</div>} />
