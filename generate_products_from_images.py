@@ -6,7 +6,7 @@ IMAGES_DIR = Path("SourceCode/frontend/public/images")
 OUT_FILE = Path("SourceCode/backend/src/main/resources/data.sql")
 
 DEFAULT_STOCK = 15
-DEFAULT_SIZE = None  # e.g. "One Size" or leave as None (NULL)
+DEFAULT_SIZE = None  
 
 SHOE_KEYWORDS = {
     "shoe", "shoes", "heel", "heels",
