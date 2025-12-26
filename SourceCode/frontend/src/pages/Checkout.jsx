@@ -40,7 +40,6 @@ const fall = keyframes`
 `;
 
 function ConfettiBurst({ active }) {
-  // Stable pieces so it doesn’t re-randomize on rerender
   const pieces = useMemo(() => {
     const colors = [
       '#8b5cf6',
@@ -107,12 +106,11 @@ function Checkout() {
   const [errors, setErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // order modal state
   const [orderInfo, setOrderInfo] = useState({ orderId: '', placedAt: '' });
   const [expandedSummary, setExpandedSummary] = useState(false);
 
-  // countdown
-  const COUNTDOWN_START = 20;
+  // ✅ countdown
+  const COUNTDOWN_START = 8;
   const [countdown, setCountdown] = useState(COUNTDOWN_START);
 
   // guards
@@ -143,32 +141,44 @@ function Checkout() {
     const id = `CBU-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const ts = new Date().toLocaleString();
 
+    // ✅ Save order to localStorage (order history)
+    const savedOrders = JSON.parse(localStorage.getItem('orders')) || [];
+    savedOrders.push({
+      id,
+      placedAt: ts,
+      userEmail: user?.email,
+      username: user?.username,
+      paymentMethod,
+      shipping: { ...form },
+      items: cartItems,
+      total: Number(cartTotal),
+    });
+    localStorage.setItem('orders', JSON.stringify(savedOrders));
+
     setOrderInfo({ orderId: id, placedAt: ts });
     setExpandedSummary(false);
     setCountdown(COUNTDOWN_START);
     setConfirmOpen(true);
 
-    // ✅ IMPORTANT: Do NOT clear cart here anymore
+    // ❌ Do NOT clear cart here
   };
 
   const handleCloseModal = () => {
-    // allow closing without clearing
     setConfirmOpen(false);
   };
 
   const handleContinueShopping = () => {
-    // ✅ clear only on continue
     clearCart();
     setConfirmOpen(false);
     navigate('/');
   };
 
-  // ✅ auto-close countdown → continue shopping
+  // ✅ countdown tick (never negative)
   useEffect(() => {
     if (!confirmOpen) return;
 
     const t = setInterval(() => {
-      setCountdown((c) => c - 1);
+      setCountdown((c) => Math.max(c - 1, 0));
     }, 1000);
 
     return () => clearInterval(t);
@@ -176,9 +186,7 @@ function Checkout() {
 
   useEffect(() => {
     if (!confirmOpen) return;
-    if (countdown <= 0) {
-      handleContinueShopping();
-    }
+    if (countdown === 0) handleContinueShopping();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdown, confirmOpen]);
 
@@ -339,8 +347,8 @@ function Checkout() {
 
           <DialogContent>
             <Typography sx={{ mb: 1.5 }}>
-              Thanks, <strong>{user?.name}</strong> — your order has been placed
-              successfully.
+              Thanks, <strong>{user?.username}</strong> — your order has been
+              placed successfully.
             </Typography>
 
             <Paper variant='outlined' sx={{ p: 2, borderRadius: 3, mb: 2 }}>
@@ -378,7 +386,6 @@ function Checkout() {
               </Stack>
             </Paper>
 
-            {/* Collapsible order items */}
             <Accordion
               expanded={expandedSummary}
               onChange={() => setExpandedSummary((p) => !p)}

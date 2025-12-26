@@ -6,6 +6,7 @@ import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
 
 function App() {
   return (
@@ -16,14 +17,12 @@ function App() {
           <Route path='products/:id' element={<ProductDetails />} />
           <Route path='cart' element={<Cart />} />
 
-          {/* ✅ Auth routes */}
           <Route path='login' element={<Login />} />
           <Route path='signup' element={<Signup />} />
 
-          {/* ✅ Checkout */}
           <Route path='checkout' element={<Checkout />} />
+          <Route path='orders' element={<Orders />} />
 
-          {/* ✅ 404 */}
           <Route path='*' element={<div>404 - Page Not Found</div>} />
         </Route>
       </Routes>

@@ -69,9 +69,21 @@ function Navbar() {
             Cart
           </Button>
 
-          {/* ✅ Auth buttons */}
+          {/* ✅ Auth */}
           {user ? (
             <>
+              <Button
+                color='inherit'
+                component={RouterLink}
+                to='/orders'
+                sx={{
+                  borderRadius: 999,
+                  px: 2,
+                  '&:hover': { backgroundColor: 'action.hover' },
+                }}>
+                My Orders
+              </Button>
+
               <Typography
                 variant='body2'
                 sx={{
