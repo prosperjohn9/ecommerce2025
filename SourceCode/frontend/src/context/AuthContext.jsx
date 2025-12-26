@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
     };
     setUsers((prev) => [...prev, newUser]);
 
-    // auto login after signup (like many sites)
+    // auto login after signup 
     setUser({
       id: newUser.id,
       username: newUser.username,

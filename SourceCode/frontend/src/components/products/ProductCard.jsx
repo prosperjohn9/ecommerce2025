@@ -86,7 +86,7 @@ function ProductCard({ product }) {
             {product.name}
           </Typography>
 
-          {/* Brand (optional) */}
+          {/* Brand */}
           {product.brand && (
             <Typography variant='body2' color='text.secondary'>
               {product.brand}

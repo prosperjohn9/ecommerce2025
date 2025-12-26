@@ -234,7 +234,7 @@ function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* -------- Mobile bottom-sheet drawer (premium easing) -------- */}
+      {/* -------- Mobile bottom-sheet drawer -------- */}
       <Drawer
         anchor='bottom'
         open={drawerOpen}
