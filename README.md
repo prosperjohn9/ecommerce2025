@@ -27,7 +27,7 @@ Built with **Spring Boot (Java, PostgreSQL)** on the backend and **React + Mater
 ### Mobile View
 ![Mobile View](./SourceCode/frontend/public/screenshots/mobile.png)
 ### Orders Page
-![Orders Page](./SourceCode/frontend/public/screenshots/checkout.png)
+![Orders Page](./SourceCode/frontend/public/screenshots/orders.png)
 
 ---
 
