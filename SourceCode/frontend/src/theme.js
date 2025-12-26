@@ -1,4 +1,3 @@
-// src/theme.js
 import { createTheme } from '@mui/material/styles';
 
 export const getTheme = (mode = 'light') =>
@@ -11,7 +10,7 @@ export const getTheme = (mode = 'light') =>
       },
 
       secondary: {
-        main: mode === 'light' ? '#8b5cf6' : '#a78bfa', // luxury accent
+        main: mode === 'light' ? '#8b5cf6' : '#a78bfa', 
       },
 
       background: {
@@ -139,5 +138,4 @@ export const getTheme = (mode = 'light') =>
     },
   });
 
-// Optional convenience default export
 export default getTheme;
