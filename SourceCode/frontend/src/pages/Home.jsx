@@ -58,7 +58,7 @@ function Home() {
         Products
       </Typography>
 
-      {/* ✅ Pill segmented control */}
+      {/* Pill segmented control */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
         <ToggleButtonGroup
           value={filter}
@@ -123,7 +123,7 @@ function Home() {
         </Box>
       ) : (
         !error && (
-          // ✅ Smooth fade-in when products render
+          // Smooth fade-in when products render
           <Box
             sx={{
               opacity: 0,

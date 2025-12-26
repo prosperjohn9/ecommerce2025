@@ -109,11 +109,11 @@ function Checkout() {
   const [orderInfo, setOrderInfo] = useState({ orderId: '', placedAt: '' });
   const [expandedSummary, setExpandedSummary] = useState(false);
 
-  // ✅ countdown (8 seconds)
+  // Countdown (8 seconds)
   const COUNTDOWN_START = 8;
   const [countdown, setCountdown] = useState(COUNTDOWN_START);
 
-  // ✅ guards (IMPORTANT: don’t redirect while modal is open)
+  // Guards (IMPORTANT: don’t redirect while modal is open)
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -146,7 +146,7 @@ function Checkout() {
     const id = `CBU-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const ts = new Date().toLocaleString();
 
-    // ✅ Save order to localStorage (order history)
+    // Save order to localStorage (order history)
     const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
     savedOrders.push({
       id,
@@ -165,10 +165,10 @@ function Checkout() {
     setCountdown(COUNTDOWN_START);
     setConfirmOpen(true);
 
-    // ❌ do NOT clear cart here
+    // Do NOT clear cart here
   };
 
-  // ✅ Close should clear cart + go to Cart page
+  // Close should clear cart + go to Cart page
   const handleCloseModal = () => {
     setConfirmOpen(false);
     navigate('/cart');
@@ -182,13 +182,13 @@ function Checkout() {
   };
 
   const handleViewOrders = () => {
-    // ✅ navigate first, then clear (prevents Checkout guard from kicking you to home)
+    // Navigate first, then clear (prevents Checkout guard from kicking to home)
     setConfirmOpen(false);
     navigate('/orders');
     setTimeout(() => clearCart(), 0);
   };
 
-  // ✅ countdown tick (never negative)
+  // Countdown tick (never negative)
   useEffect(() => {
     if (!confirmOpen) return;
 
@@ -199,7 +199,7 @@ function Checkout() {
     return () => clearInterval(t);
   }, [confirmOpen]);
 
-  // ✅ auto-finish when countdown hits 0
+  // Auto-finish when countdown hits 0
   useEffect(() => {
     if (!confirmOpen) return;
     if (countdown === 0) handleContinueShopping();

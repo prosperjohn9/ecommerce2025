@@ -87,7 +87,7 @@ function Cart() {
 
           <Divider />
 
-          {/* ✅ Summary + Checkout */}
+          {/* Summary + Checkout */}
           <Paper sx={{ p: 2 }}>
             <Stack spacing={2}>
               <Stack
