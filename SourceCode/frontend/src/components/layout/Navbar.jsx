@@ -18,6 +18,11 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -28,6 +33,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
 
 import { useCart } from '../../context/CartContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -40,6 +46,7 @@ function Navbar() {
   const { user, logout } = useAuth();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const openDrawer = () => setDrawerOpen(true);
   const closeDrawer = () => setDrawerOpen(false);
@@ -49,16 +56,20 @@ function Navbar() {
     navigate(path);
   };
 
-  const handleLogout = () => {
-    closeDrawer();
-    logout();
-    navigate('/');
-  };
-
   const cartLabel = useMemo(() => {
     if (!cartCount) return 'Cart';
     return `Cart (${cartCount})`;
   }, [cartCount]);
+
+  const handleLogoutClick = () => setLogoutOpen(true);
+  const handleLogoutCancel = () => setLogoutOpen(false);
+
+  const handleLogoutConfirm = () => {
+    setLogoutOpen(false);
+    closeDrawer();
+    logout();
+    navigate('/');
+  };
 
   return (
     <>
@@ -141,7 +152,7 @@ function Navbar() {
 
                 <Button
                   color='inherit'
-                  onClick={logout}
+                  onClick={handleLogoutClick}
                   sx={{
                     borderRadius: 999,
                     px: 2,
@@ -223,11 +234,18 @@ function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* -------- Mobile bottom-sheet drawer -------- */}
+      {/* -------- Mobile bottom-sheet drawer (premium easing) -------- */}
       <Drawer
         anchor='bottom'
         open={drawerOpen}
         onClose={closeDrawer}
+        transitionDuration={280}
+        SlideProps={{
+          easing: {
+            enter: 'cubic-bezier(0.2, 0.9, 0.2, 1)',
+            exit: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          },
+        }}
         PaperProps={{
           sx: {
             borderTopLeftRadius: 20,
@@ -236,7 +254,7 @@ function Navbar() {
           },
         }}>
         <Box sx={{ px: 2, pt: 1.5 }}>
-          {/* “grab handle” */}
+          {/* grab handle */}
           <Box
             sx={{
               width: 42,
@@ -262,6 +280,21 @@ function Navbar() {
               Close
             </Button>
           </Stack>
+
+          {/* Checkout CTA (only when cart has items) */}
+          {cartCount > 0 && (
+            <Box sx={{ mt: 1.5 }}>
+              <Button
+                fullWidth
+                variant='contained'
+                size='large'
+                startIcon={<CreditCardIcon />}
+                onClick={() => go('/checkout')}
+                sx={{ borderRadius: 3, py: 1.2 }}>
+                Checkout
+              </Button>
+            </Box>
+          )}
 
           <Divider sx={{ my: 1.5 }} />
 
@@ -294,7 +327,11 @@ function Navbar() {
             <Divider sx={{ my: 1 }} />
 
             {user ? (
-              <ListItemButton onClick={handleLogout}>
+              <ListItemButton
+                onClick={() => {
+                  closeDrawer();
+                  handleLogoutClick();
+                }}>
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>
@@ -320,6 +357,31 @@ function Navbar() {
           </List>
         </Box>
       </Drawer>
+
+      {/* -------- Logout confirmation modal -------- */}
+      <Dialog
+        open={logoutOpen}
+        onClose={handleLogoutCancel}
+        maxWidth='xs'
+        fullWidth>
+        <DialogTitle sx={{ fontWeight: 900 }}>Log out?</DialogTitle>
+        <DialogContent>
+          <Typography color='text.secondary'>
+            You’ll be signed out of your account on this device.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleLogoutCancel} variant='outlined'>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleLogoutConfirm}
+            variant='contained'
+            color='error'>
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
