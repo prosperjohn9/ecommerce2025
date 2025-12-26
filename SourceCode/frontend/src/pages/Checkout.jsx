@@ -168,7 +168,12 @@ function Checkout() {
     // ❌ do NOT clear cart here
   };
 
-  const handleCloseModal = () => setConfirmOpen(false);
+  // ✅ Close should clear cart + go to Cart page
+  const handleCloseModal = () => {
+    setConfirmOpen(false);
+    navigate('/cart');
+    setTimeout(() => clearCart(), 0); // clear AFTER navigation (prevents guard redirect to home)
+  };
 
   const handleContinueShopping = () => {
     clearCart();
