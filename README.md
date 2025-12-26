@@ -5,6 +5,12 @@ A **full-stack e-commerce web application** for a fashion store selling bags and
 Built with **Spring Boot (Java, PostgreSQL)** on the backend and **React + Material UI** on the frontend.
 
 ---
+## 🎥 Demo Video
+
+▶️ **Watch the demo here:**  
+https://youtu.be/MEGSZVTxtZU
+
+---
 
 ## 📸 Screenshots
 
