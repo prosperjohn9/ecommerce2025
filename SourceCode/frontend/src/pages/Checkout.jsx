@@ -109,15 +109,20 @@ function Checkout() {
   const [orderInfo, setOrderInfo] = useState({ orderId: '', placedAt: '' });
   const [expandedSummary, setExpandedSummary] = useState(false);
 
-  // ✅ countdown
+  // ✅ countdown (8 seconds)
   const COUNTDOWN_START = 8;
   const [countdown, setCountdown] = useState(COUNTDOWN_START);
 
-  // guards
+  // ✅ guards (IMPORTANT: don’t redirect while modal is open)
   useEffect(() => {
-    if (cartItems.length === 0) navigate('/');
-    if (!user) navigate('/login');
-  }, [cartItems, user, navigate]);
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (!confirmOpen && cartItems.length === 0) {
+      navigate('/');
+    }
+  }, [cartItems.length, user, confirmOpen, navigate]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -142,12 +147,12 @@ function Checkout() {
     const ts = new Date().toLocaleString();
 
     // ✅ Save order to localStorage (order history)
-    const savedOrders = JSON.parse(localStorage.getItem('orders')) || [];
+    const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
     savedOrders.push({
       id,
       placedAt: ts,
-      userEmail: user?.email,
-      username: user?.username,
+      userEmail: user?.email || '',
+      username: user?.username || user?.name || '',
       paymentMethod,
       shipping: { ...form },
       items: cartItems,
@@ -160,17 +165,22 @@ function Checkout() {
     setCountdown(COUNTDOWN_START);
     setConfirmOpen(true);
 
-    // ❌ Do NOT clear cart here
+    // ❌ do NOT clear cart here
   };
 
-  const handleCloseModal = () => {
-    setConfirmOpen(false);
-  };
+  const handleCloseModal = () => setConfirmOpen(false);
 
   const handleContinueShopping = () => {
     clearCart();
     setConfirmOpen(false);
     navigate('/');
+  };
+
+  const handleViewOrders = () => {
+    // ✅ navigate first, then clear (prevents Checkout guard from kicking you to home)
+    setConfirmOpen(false);
+    navigate('/orders');
+    setTimeout(() => clearCart(), 0);
   };
 
   // ✅ countdown tick (never negative)
@@ -184,6 +194,7 @@ function Checkout() {
     return () => clearInterval(t);
   }, [confirmOpen]);
 
+  // ✅ auto-finish when countdown hits 0
   useEffect(() => {
     if (!confirmOpen) return;
     if (countdown === 0) handleContinueShopping();
@@ -347,8 +358,8 @@ function Checkout() {
 
           <DialogContent>
             <Typography sx={{ mb: 1.5 }}>
-              Thanks, <strong>{user?.username}</strong> — your order has been
-              placed successfully.
+              Thanks, <strong>{user?.username || user?.name}</strong> — your
+              order has been placed successfully.
             </Typography>
 
             <Paper variant='outlined' sx={{ p: 2, borderRadius: 3, mb: 2 }}>
@@ -430,10 +441,15 @@ function Checkout() {
             </Typography>
           </DialogContent>
 
-          <DialogActions sx={{ p: 2 }}>
+          <DialogActions sx={{ p: 2, gap: 1 }}>
             <Button onClick={handleCloseModal} variant='outlined'>
               Close
             </Button>
+
+            <Button onClick={handleViewOrders} variant='outlined'>
+              View Orders
+            </Button>
+
             <Button onClick={handleContinueShopping} variant='contained'>
               Continue shopping ({countdown}s)
             </Button>

@@ -17,15 +17,12 @@ function App() {
           <Route path='products/:id' element={<ProductDetails />} />
           <Route path='cart' element={<Cart />} />
 
-          {/* Auth */}
           <Route path='login' element={<Login />} />
           <Route path='signup' element={<Signup />} />
 
-          {/* Checkout + Orders */}
           <Route path='checkout' element={<Checkout />} />
           <Route path='orders' element={<Orders />} />
 
-          {/* 404 */}
           <Route path='*' element={<div>404 - Page Not Found</div>} />
         </Route>
       </Routes>

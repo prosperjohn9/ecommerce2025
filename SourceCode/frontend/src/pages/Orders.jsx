@@ -23,24 +23,21 @@ function Orders() {
 
   const [orders, setOrders] = useState([]);
 
-  // guard: must be logged in
   useEffect(() => {
     if (!user) navigate('/login');
   }, [user, navigate]);
 
-  // load orders once
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('orders') || '[]');
     setOrders(saved);
   }, []);
 
-  // show only this user’s orders (by email)
   const myOrders = useMemo(() => {
     if (!user?.email) return [];
     return orders
       .filter((o) => o.userEmail === user.email)
       .slice()
-      .reverse(); // newest first
+      .reverse();
   }, [orders, user]);
 
   const paymentLabel = (m) => (m === 'COD' ? 'Cash on Delivery' : 'Card');
@@ -109,7 +106,6 @@ function Orders() {
                 </AccordionSummary>
 
                 <AccordionDetails>
-                  {/* Shipping */}
                   <Paper
                     variant='outlined'
                     sx={{ p: 2, borderRadius: 3, mb: 2 }}>
@@ -135,12 +131,11 @@ function Orders() {
                     </Stack>
                   </Paper>
 
-                  {/* Items */}
                   <Typography sx={{ fontWeight: 900, mb: 1 }}>Items</Typography>
                   <Stack spacing={1}>
                     {(o.items || []).map((item) => (
                       <Stack
-                        key={item.id + '-' + item.name}
+                        key={`${item.id}-${item.name}`}
                         direction='row'
                         justifyContent='space-between'
                         spacing={2}
