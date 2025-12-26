@@ -8,9 +8,8 @@ Built with **Spring Boot (Java, PostgreSQL)** on the backend and **React + Mater
 
 ## 📸 Screenshots
 
-> _(Add screenshots by uploading images to the repository and linking them here)_
-
-- Home – Product Grid ![Home Page] (../SourceCode/frontend/public/screenshots/home.png)
+### Home – Product Grid
+![Home Page](./SourceCode/frontend/public/screenshots/home.png)
 - Product Details
 - Cart Page
 - Checkout + Order Confirmation
