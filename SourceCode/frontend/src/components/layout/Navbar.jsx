@@ -15,10 +15,12 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import { Link as RouterLink } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useThemeMode } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 function Navbar() {
   const { cartCount } = useCart();
   const { mode, toggleMode } = useThemeMode();
+  const { user, logout } = useAuth();
 
   return (
     <AppBar position='sticky' elevation={0}>
@@ -67,14 +69,54 @@ function Navbar() {
             Cart
           </Button>
 
-          {/* Optional placeholders for Phase 10.3
-          <Button color="inherit" component={RouterLink} to="/login" sx={{ borderRadius: 999, px: 2 }}>
-            Login
-          </Button>
-          <Button variant="contained" color="primary" component={RouterLink} to="/signup" sx={{ borderRadius: 999, px: 2 }}>
-            Sign up
-          </Button>
-          */}
+          {/* ✅ Auth buttons */}
+          {user ? (
+            <>
+              <Typography
+                variant='body2'
+                sx={{
+                  fontWeight: 800,
+                  mx: 1,
+                  display: { xs: 'none', sm: 'block' },
+                }}>
+                Hi, {user.username}
+              </Typography>
+
+              <Button
+                color='inherit'
+                onClick={logout}
+                sx={{
+                  borderRadius: 999,
+                  px: 2,
+                  '&:hover': { backgroundColor: 'action.hover' },
+                }}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                color='inherit'
+                component={RouterLink}
+                to='/login'
+                sx={{
+                  borderRadius: 999,
+                  px: 2,
+                  '&:hover': { backgroundColor: 'action.hover' },
+                }}>
+                Login
+              </Button>
+
+              <Button
+                variant='contained'
+                color='primary'
+                component={RouterLink}
+                to='/signup'
+                sx={{ borderRadius: 999, px: 2 }}>
+                Sign up
+              </Button>
+            </>
+          )}
 
           <Box sx={{ width: 6 }} />
 
