@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { getAllProducts } from '../api/productAPI';
 import ProductCard from '../components/products/ProductCard';
 
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
+
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -57,31 +58,43 @@ function Home() {
         Products
       </Typography>
 
-      <Stack
-        direction='row'
-        spacing={2}
-        sx={{ mb: 3 }}
-        justifyContent='center'
-        flexWrap='wrap'
-        useFlexGap>
-        <Button
-          variant={filter === 'ALL' ? 'contained' : 'outlined'}
-          onClick={() => setFilter('ALL')}>
-          All
-        </Button>
-
-        <Button
-          variant={filter === 'BAG' ? 'contained' : 'outlined'}
-          onClick={() => setFilter('BAG')}>
-          Bags
-        </Button>
-
-        <Button
-          variant={filter === 'SHOE' ? 'contained' : 'outlined'}
-          onClick={() => setFilter('SHOE')}>
-          Shoes
-        </Button>
-      </Stack>
+      {/* ✅ Pill segmented control */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <ToggleButtonGroup
+          value={filter}
+          exclusive
+          onChange={(_, next) => {
+            if (next) setFilter(next);
+          }}
+          sx={{
+            p: 0.5,
+            borderRadius: 999,
+            border: '1px solid',
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
+            '& .MuiToggleButton-root': {
+              px: 2.5,
+              py: 1,
+              border: 0,
+              borderRadius: 999,
+              textTransform: 'none',
+              fontWeight: 900,
+              minWidth: 90,
+            },
+            '& .MuiToggleButton-root.Mui-selected': {
+              backgroundColor: 'primary.main',
+              color: 'background.paper',
+              '&:hover': {
+                backgroundColor: 'primary.main',
+                opacity: 0.92,
+              },
+            },
+          }}>
+          <ToggleButton value='ALL'>All</ToggleButton>
+          <ToggleButton value='BAG'>Bags</ToggleButton>
+          <ToggleButton value='SHOE'>Shoes</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
       {error && <Alert severity='error'>{error}</Alert>}
 
@@ -110,10 +123,21 @@ function Home() {
         </Box>
       ) : (
         !error && (
-          <Box sx={gridSx}>
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          // ✅ Smooth fade-in when products render
+          <Box
+            sx={{
+              opacity: 0,
+              transform: 'translateY(6px)',
+              animation: 'fadeUp 260ms ease forwards',
+              '@keyframes fadeUp': {
+                to: { opacity: 1, transform: 'translateY(0px)' },
+              },
+            }}>
+            <Box sx={gridSx}>
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </Box>
           </Box>
         )
       )}
