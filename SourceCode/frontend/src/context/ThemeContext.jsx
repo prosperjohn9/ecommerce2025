@@ -5,13 +5,16 @@ import { getTheme } from '../theme';
 
 const ThemeModeContext = createContext(null);
 
+const STORAGE_KEY = 'themeMode';
+
 export function ThemeModeProvider({ children }) {
-  const [mode, setMode] = useState(
-    () => localStorage.getItem('mode') || 'light'
-  );
+  const [mode, setMode] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved === 'dark' || saved === 'light' ? saved : 'light';
+  });
 
   useEffect(() => {
-    localStorage.setItem('mode', mode);
+    localStorage.setItem(STORAGE_KEY, mode);
   }, [mode]);
 
   const theme = useMemo(() => getTheme(mode), [mode]);
@@ -34,7 +37,8 @@ export function ThemeModeProvider({ children }) {
 
 export function useThemeMode() {
   const ctx = useContext(ThemeModeContext);
-  if (!ctx)
+  if (!ctx) {
     throw new Error('useThemeMode must be used inside ThemeModeProvider');
+  }
   return ctx;
 }

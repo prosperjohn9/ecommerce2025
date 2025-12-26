@@ -22,6 +22,9 @@ export const getTheme = (mode = 'light') =>
       error: {
         main: mode === 'light' ? '#dc2626' : '#ef4444',
       },
+
+      divider:
+        mode === 'light' ? 'rgba(17,24,39,0.10)' : 'rgba(229,231,235,0.12)',
     },
 
     shape: {
@@ -30,9 +33,9 @@ export const getTheme = (mode = 'light') =>
 
     typography: {
       fontFamily: ['Inter', 'Roboto', 'Arial', 'sans-serif'].join(','),
-      h4: { fontWeight: 800 },
-      h5: { fontWeight: 700 },
-      h6: { fontWeight: 700 },
+      h4: { fontWeight: 800, letterSpacing: -0.6 },
+      h5: { fontWeight: 750, letterSpacing: -0.4 },
+      h6: { fontWeight: 700, letterSpacing: -0.2 },
       button: {
         textTransform: 'none',
         fontWeight: 700,
@@ -40,11 +43,39 @@ export const getTheme = (mode = 'light') =>
     },
 
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
+          },
+        },
+      },
+
       MuiAppBar: {
         styleOverrides: {
           root: {
             backgroundColor: mode === 'light' ? '#ffffff' : '#0b0e14',
             color: mode === 'light' ? '#111827' : '#e5e7eb',
+            borderBottom:
+              mode === 'light'
+                ? '1px solid rgba(17,24,39,0.08)'
+                : '1px solid rgba(229,231,235,0.08)',
+            backdropFilter: 'saturate(180%) blur(8px)',
+          },
+        },
+      },
+
+      MuiContainer: {
+        defaultProps: {
+          maxWidth: 'xl',
+        },
+      },
+
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
           },
         },
       },
@@ -54,6 +85,10 @@ export const getTheme = (mode = 'light') =>
         styleOverrides: {
           root: {
             borderRadius: 18,
+            border:
+              mode === 'light'
+                ? '1px solid rgba(17,24,39,0.08)'
+                : '1px solid rgba(229,231,235,0.08)',
           },
         },
       },
@@ -70,7 +105,39 @@ export const getTheme = (mode = 'light') =>
               backgroundColor: mode === 'light' ? '#000000' : '#ffffff',
             },
           },
+          outlinedPrimary: {
+            borderColor:
+              mode === 'light'
+                ? 'rgba(17,24,39,0.25)'
+                : 'rgba(229,231,235,0.25)',
+          },
+        },
+      },
+
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: 999,
+            fontWeight: 650,
+          },
+        },
+      },
+
+      MuiTextField: {
+        defaultProps: {
+          size: 'medium',
+        },
+      },
+
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+          },
         },
       },
     },
   });
+
+// Optional convenience default export
+export default getTheme;
