@@ -10,16 +10,23 @@ Built with **Spring Boot (Java, PostgreSQL)** on the backend and **React + Mater
 
 ### Home – Product Grid
 ![Home Page](./SourceCode/frontend/public/screenshots/home.png)
-- Product Details
-- Cart Page
-- Checkout + Order Confirmation
+### Product Details
+![Product Details](./SourceCode/frontend/public/screenshots/productcard.png)
+### Cart Page
+![Cart Page](./SourceCode/frontend/public/screenshots/cart.png)
+### Checkout
+![Checkout](./SourceCode/frontend/public/screenshots/checkout.png)
+### Order Confirmation
+![Order Confirmation](./SourceCode/frontend/public/screenshots/orderconfirmation.png)
+### Sign Up
+![Sign Up](./SourceCode/frontend/public/screenshots/signup.png)
+### Log In
+![Log In](./SourceCode/frontend/public/screenshots/login.png)
+### Dark Mode
+![Dark Mode](./SourceCode/frontend/public/screenshots/darkmode.png)
+### Mobile View
+![Mobile View](./SourceCode/frontend/public/screenshots/checkout.png)
 - Orders Page
-- Light / Dark Mode
-
-Example:
-```
-![Home Page](screenshots/home.png)
-```
 
 ---
 
@@ -45,7 +52,7 @@ Example:
 ## 📂 Project Structure
 
 ```
-BagsShoesEcommerce_2025/
+Ecommerce_2025/
 ├── SourceCode/
 │   ├── backend/        # Spring Boot application
 │   ├── frontend/       # React application
@@ -83,7 +90,7 @@ BagsShoesEcommerce_2025/
 - ✔ Cart total calculation
 
 ### Authentication (Frontend)
-- ✔ Signup page
+- ✔ Sign up page
 - ✔ Login page
 - ✔ Fake auth with localStorage
 - ✔ Username displayed in Navbar
