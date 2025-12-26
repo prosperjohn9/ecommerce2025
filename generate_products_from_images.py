@@ -5,33 +5,35 @@ from datetime import datetime
 IMAGES_DIR = Path("SourceCode/frontend/public/images")
 OUT_FILE = Path("SourceCode/backend/src/main/resources/data.sql")
 
-shoe_keywords = {
+DEFAULT_STOCK = 15
+DEFAULT_SIZE = None  # e.g. "One Size" or leave as None (NULL)
+
+SHOE_KEYWORDS = {
     "shoe", "shoes", "heel", "heels",
     "loafers", "stiletto", "stilettos",
     "slip", "sliper", "slippers",
     "sandals", "sandal"
 }
 
-# Expanded list for your dataset
-colors = [
+COLORS = [
     "black", "white", "red", "green", "blue", "brown", "pink",
     "gray", "grey", "oxblood", "nude", "gold", "silver",
     "beige", "cream", "tan"
 ]
 
 def is_shoe(folder: str) -> bool:
-    return any(k in folder.lower() for k in shoe_keywords)
+    f = folder.lower()
+    return any(k in f for k in SHOE_KEYWORDS)
 
-def title(s: str) -> str:
-    return " ".join(w.capitalize() for w in s.replace("_", " ").split())
+def titleize(s: str) -> str:
+    return " ".join(w.capitalize() for w in s.replace("_", " ").split() if w)
 
 def sql_escape(s: str) -> str:
-    # escape single quotes for SQL
     return s.replace("'", "''")
 
 def detect_color(text: str):
     low = text.lower()
-    for c in colors:
+    for c in COLORS:
         if c in low:
             return c.capitalize()
     return None
@@ -40,18 +42,23 @@ def product_name(folder: str, filename: str) -> str:
     base = re.sub(r"\.(jpg|jpeg|png|webp)$", "", filename, flags=re.I)
     base_clean = base.replace("_", " ").strip()
 
-    folder_title = title(folder)
+    folder_title = titleize(folder)
     color = detect_color(base_clean)
 
-    # If we find a color, use: Brand (Color)
+    # Prefer: Brand (Color)
     if color:
         return f"{folder_title} ({color})"
 
-    # Otherwise: Brand + readable base
-    return f"{folder_title} {title(base_clean)}"
+    # Otherwise: Brand + readable filename
+    return f"{folder_title} {titleize(base_clean)}"
 
 def build_description(category: str, folder: str) -> str:
-    return f"Premium {category.lower()} from the {title(folder)} collection."
+    return f"Premium {category.lower()} from the {titleize(folder)} collection."
+
+def sql_nullable_str(value):
+    if value is None or str(value).strip() == "":
+        return "NULL"
+    return f"'{sql_escape(str(value))}'"
 
 def main():
     if not IMAGES_DIR.exists():
@@ -68,6 +75,7 @@ def main():
         if not folder.is_dir():
             continue
 
+        brand = titleize(folder.name)
         category = "SHOE" if is_shoe(folder.name) else "BAG"
         price = 69.99 if category == "SHOE" else 89.99
 
@@ -77,12 +85,17 @@ def main():
 
             name = product_name(folder.name, img.name)
             image_url = f"/images/{folder.name}/{img.name}"
-            desc = build_description(category, folder.name)
+            description = build_description(category, folder.name)
+            color = detect_color(img.stem)  # stem = filename without extension
 
-            rows.append(
-                "INSERT INTO product (name, price, category, description, image_url) VALUES "
-                f"('{sql_escape(name)}', {price}, '{category}', '{sql_escape(desc)}', '{sql_escape(image_url)}');"
+            stmt = (
+                "INSERT INTO product (name, price, category, description, image_url, brand, color, stock, size) VALUES "
+                f"('{sql_escape(name)}', {price}, '{category}', '{sql_escape(description)}', "
+                f"'{sql_escape(image_url)}', '{sql_escape(brand)}', {sql_nullable_str(color)}, "
+                f"{DEFAULT_STOCK}, {sql_nullable_str(DEFAULT_SIZE)});"
             )
+
+            rows.append(stmt)
             count += 1
 
     OUT_FILE.write_text("\n".join(rows) + "\n", encoding="utf-8")
