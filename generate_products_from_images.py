@@ -62,7 +62,7 @@ def sql_nullable_str(value):
 
 def main():
     if not IMAGES_DIR.exists():
-        raise SystemExit(f"❌ Images folder not found: {IMAGES_DIR}")
+        raise SystemExit(f"Images folder not found: {IMAGES_DIR}")
 
     rows = []
     rows.append(f"-- Auto-generated from images on {datetime.now().isoformat(timespec='seconds')}")
@@ -99,7 +99,7 @@ def main():
             count += 1
 
     OUT_FILE.write_text("\n".join(rows) + "\n", encoding="utf-8")
-    print(f"✅ Generated {count} products into: {OUT_FILE}")
+    print(f"Generated {count} products into: {OUT_FILE}")
 
 if __name__ == "__main__":
     main()

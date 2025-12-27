@@ -6,7 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "product") // ✅ matches data.sql
+@Table(name = "product") 
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,6 +35,6 @@ public class Product {
     private String size;
     private Integer stock;
 
-    @Column(name = "image_url") // ✅ matches data.sql column name
+    @Column(name = "image_url") 
     private String imageUrl;
 }
