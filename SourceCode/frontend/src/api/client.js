@@ -54,6 +54,7 @@ export function errorMessage(error, fallback) {
   }
   if (data?.message) return data.message;
   if (!error?.response) return 'Cannot reach the server. Is the backend running?';
+  if (error.response.status === 401) return 'Your session has ended. Please log in again.';
   return fallback;
 }
 
