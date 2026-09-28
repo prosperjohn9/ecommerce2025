@@ -43,7 +43,9 @@ function Navbar() {
   const navigate = useNavigate();
   const { cartCount } = useCart();
   const { mode, toggleMode } = useThemeMode();
-  const { user, logout } = useAuth();
+  // While the /auth/me check runs, show neither Login/Sign up nor Logout,
+  // so a signed-in user never sees the signed-out buttons flash on refresh.
+  const { user, loading: authLoading, logout } = useAuth();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -139,7 +141,7 @@ function Navbar() {
               </Button>
             )}
 
-            {user ? (
+            {authLoading ? null : user ? (
               <>
                 <Typography
                   variant='body2'
@@ -327,7 +329,7 @@ function Navbar() {
 
             <Divider sx={{ my: 1 }} />
 
-            {user ? (
+            {authLoading ? null : user ? (
               <ListItemButton
                 onClick={() => {
                   closeDrawer();
