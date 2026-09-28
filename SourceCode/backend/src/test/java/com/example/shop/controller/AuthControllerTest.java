@@ -1,9 +1,12 @@
 package com.example.shop.controller;
 
+import com.example.shop.dto.RegisterRequest;
 import com.example.shop.model.UserAccount;
 import com.example.shop.repository.UserAccountRepository;
+import com.example.shop.service.AccountService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,9 +17,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -25,6 +31,8 @@ import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,6 +54,14 @@ class AuthControllerTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AccountService accountService;
+
+    // Each test gets its own client IP so the per-IP login limit never leaks between tests.
+    private final String clientIp = "10." + ThreadLocalRandom.current().nextInt(256)
+            + "." + ThreadLocalRandom.current().nextInt(256)
+            + "." + ThreadLocalRandom.current().nextInt(256);
 
     @Test
     void csrfEndpointReturnsHeaderNameAndToken() throws Exception {
@@ -166,6 +182,191 @@ class AuthControllerTest {
                         .content(body(uniqueEmail(), PASSWORD, "Stale")))
                 .andExpect(status().isForbidden());
     }
+
+    // ---- Login and logout ----
+
+    @Test
+    void loginWithCorrectPasswordStartsSession() throws Exception {
+        String email = createAccount("Grace");
+        MockHttpSession session = new MockHttpSession();
+
+        login(session, "  " + email.toUpperCase(Locale.ROOT) + " ", PASSWORD)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.displayName").value("Grace"))
+                .andExpect(jsonPath("$.passwordHash").doesNotExist());
+
+        mockMvc.perform(get("/api/auth/me").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(email));
+    }
+
+    @Test
+    void wrongPasswordAndUnknownEmailGetTheSameAnswer() throws Exception {
+        String email = createAccount("Known");
+
+        String wrongPassword = login(new MockHttpSession(), email, "not the right password")
+                .andExpect(status().isUnauthorized())
+                .andReturn().getResponse().getContentAsString();
+        String unknownEmail = login(new MockHttpSession(), uniqueEmail(), PASSWORD)
+                .andExpect(status().isUnauthorized())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(objectMapper.readTree(wrongPassword).get("message").asText())
+                .isEqualTo("Invalid email or password.");
+        assertThat(withoutTimestamp(wrongPassword)).isEqualTo(withoutTimestamp(unknownEmail));
+    }
+
+    @Test
+    void loginRotatesSessionIdAndCsrfToken() throws Exception {
+        String email = createAccount("Rotator");
+        MockHttpSession session = new MockHttpSession();
+        Csrf before = fetchCsrf(session);
+        String sessionIdBefore = session.getId();
+
+        mockMvc.perform(post("/api/auth/login").session(session)
+                        .with(fromIp(clientIp))
+                        .header(before.headerName(), before.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody(email, PASSWORD)))
+                .andExpect(status().isOk());
+
+        assertThat(session.getId()).isNotEqualTo(sessionIdBefore);
+        mockMvc.perform(post("/api/auth/logout").session(session)
+                        .header(before.headerName(), before.token()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void loginWithoutCsrfTokenIsForbidden() throws Exception {
+        String email = createAccount("NoToken");
+        MockHttpSession session = new MockHttpSession();
+
+        mockMvc.perform(post("/api/auth/login").session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody(email, PASSWORD)))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/auth/me").session(session))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void loginRejectsBlankFields() throws Exception {
+        login(new MockHttpSession(), " ", "")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.email").exists())
+                .andExpect(jsonPath("$.errors.password").exists());
+    }
+
+    @Test
+    void logoutEndsTheSessionAndClearsTheCookie() throws Exception {
+        String email = createAccount("Leaver");
+        MockHttpSession session = new MockHttpSession();
+        login(session, email, PASSWORD).andExpect(status().isOk());
+        Csrf csrf = fetchCsrf(session);
+
+        mockMvc.perform(post("/api/auth/logout").session(session)
+                        .header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isNoContent())
+                .andExpect(cookie().maxAge("JSESSIONID", 0));
+
+        assertThat(session.isInvalid()).isTrue();
+        mockMvc.perform(get("/api/auth/me").session(session))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logoutWithoutCsrfTokenIsForbidden() throws Exception {
+        String email = createAccount("Stayer");
+        MockHttpSession session = new MockHttpSession();
+        login(session, email, PASSWORD).andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/logout").session(session))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/auth/me").session(session))
+                .andExpect(status().isOk());
+    }
+
+    // ---- Login rate limit: 5 failures per email, 20 per IP, per 15 minutes ----
+
+    @Test
+    void blocksAnEmailAfterFiveFailedAttempts() throws Exception {
+        String email = createAccount("Target");
+        for (int i = 0; i < 5; i++) {
+            login(new MockHttpSession(), email, "wrong password " + i).andExpect(status().isUnauthorized());
+        }
+
+        // Even the right password is refused while the email is blocked.
+        login(new MockHttpSession(), email, PASSWORD)
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.message").value("Too many failed sign-in attempts. Try again later."));
+    }
+
+    @Test
+    void unknownEmailsAreBlockedTheSameWay() throws Exception {
+        String unknown = uniqueEmail();
+        for (int i = 0; i < 5; i++) {
+            login(new MockHttpSession(), unknown, "wrong password " + i).andExpect(status().isUnauthorized());
+        }
+
+        login(new MockHttpSession(), unknown, PASSWORD)
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
+    void blocksAnIpAfterTwentyFailedAttempts() throws Exception {
+        String email = createAccount("Neighbour");
+        for (int i = 0; i < 20; i++) {
+            login(new MockHttpSession(), uniqueEmail(), "guess " + i).andExpect(status().isUnauthorized());
+        }
+
+        login(new MockHttpSession(), email, PASSWORD)
+                .andExpect(status().isTooManyRequests());
+        login(new MockHttpSession(), email, PASSWORD, "10.255.255.254")
+                .andExpect(status().isOk());
+    }
+
+    private ResultActions login(MockHttpSession session, String email, String password) throws Exception {
+        return login(session, email, password, clientIp);
+    }
+
+    private ResultActions login(MockHttpSession session, String email, String password, String ip)
+            throws Exception {
+        Csrf csrf = fetchCsrf(session);
+        return mockMvc.perform(post("/api/auth/login").session(session)
+                .with(fromIp(ip))
+                .header(csrf.headerName(), csrf.token())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody(email, password)));
+    }
+
+    private String loginBody(String email, String password) throws Exception {
+        return objectMapper.writeValueAsString(Map.of("email", email, "password", password));
+    }
+
+    private static RequestPostProcessor fromIp(String ip) {
+        return request -> {
+            request.setRemoteAddr(ip);
+            return request;
+        };
+    }
+
+    private String createAccount(String displayName) {
+        String email = uniqueEmail();
+        accountService.register(new RegisterRequest(email, PASSWORD, displayName));
+        return email;
+    }
+
+    private JsonNode withoutTimestamp(String json) throws Exception {
+        ObjectNode node = (ObjectNode) objectMapper.readTree(json);
+        node.remove("timestamp");
+        return node;
+    }
+
+    // ---- Helpers ----
 
     private ResultActions register(MockHttpSession session, String email, String password, String displayName)
             throws Exception {
