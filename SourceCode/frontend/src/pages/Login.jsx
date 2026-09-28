@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useLocation, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 import Container from '@mui/material/Container';
@@ -14,25 +14,30 @@ import Link from '@mui/material/Link';
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [identifier, setIdentifier] = useState(''); // username OR email
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = useMemo(() => {
-    return identifier.trim().length >= 3 && password.length >= 6;
-  }, [identifier, password]);
+    return email.trim().includes('@') && password.length > 0 && !submitting;
+  }, [email, password, submitting]);
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
-    const res = login({ identifier, password });
+    const res = await login({ email, password });
+    setSubmitting(false);
     if (!res.ok) {
       setError(res.message || 'Login failed.');
       return;
     }
-    navigate('/');
+    // Back to the page that asked for sign-in (e.g. checkout), else home.
+    navigate(location.state?.from?.pathname || '/', { replace: true });
   };
 
   return (
@@ -43,7 +48,7 @@ function Login() {
         </Typography>
 
         <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
-          Sign in with your username or email.
+          Sign in with your email.
         </Typography>
 
         {error && (
@@ -54,9 +59,10 @@ function Login() {
 
         <Stack component='form' spacing={2} onSubmit={onSubmit}>
           <TextField
-            label='Username or Email'
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            label='Email'
+            type='email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             autoComplete='username'
             fullWidth
           />

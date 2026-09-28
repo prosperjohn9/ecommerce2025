@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import RequireAuth from './components/auth/RequireAuth';
 import Home from './pages/Home';
 import ProductDetails from './components/products/ProductDetails';
 import Cart from './pages/Cart';
@@ -20,8 +21,22 @@ function App() {
           <Route path='login' element={<Login />} />
           <Route path='signup' element={<Signup />} />
 
-          <Route path='checkout' element={<Checkout />} />
-          <Route path='orders' element={<Orders />} />
+          <Route
+            path='checkout'
+            element={
+              <RequireAuth>
+                <Checkout />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path='orders'
+            element={
+              <RequireAuth>
+                <Orders />
+              </RequireAuth>
+            }
+          />
 
           <Route path='*' element={<div>404 - Page Not Found</div>} />
         </Route>

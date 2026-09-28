@@ -64,11 +64,12 @@ function Navbar() {
   const handleLogoutClick = () => setLogoutOpen(true);
   const handleLogoutCancel = () => setLogoutOpen(false);
 
-  const handleLogoutConfirm = () => {
+  const handleLogoutConfirm = async () => {
     setLogoutOpen(false);
     closeDrawer();
-    logout();
+    // Leave protected pages first, or their guard would send us to /login.
     navigate('/');
+    await logout();
   };
 
   return (
@@ -147,7 +148,7 @@ function Navbar() {
                     mx: 1,
                     display: { xs: 'none', sm: 'block' },
                   }}>
-                  Hi, {user.username}
+                  Hi, {user.displayName}
                 </Typography>
 
                 <Button
@@ -271,7 +272,7 @@ function Navbar() {
             justifyContent='space-between'
             alignItems='center'>
             <Typography sx={{ fontWeight: 900 }}>
-              {user ? `Hi, ${user.username}` : 'Menu'}
+              {user ? `Hi, ${user.displayName}` : 'Menu'}
             </Typography>
             <Button
               onClick={closeDrawer}

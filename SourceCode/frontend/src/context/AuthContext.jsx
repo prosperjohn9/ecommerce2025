@@ -1,100 +1,72 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import * as authAPI from '../api/authAPI';
+import { errorMessage } from '../api/client';
 
 const AuthContext = createContext(null);
 
-const USER_LIST_KEY = 'authUsers'; // array of users
-const CURRENT_USER_KEY = 'authUser'; // current session user
+// Older versions of this app kept accounts (with plaintext passwords) and orders
+// in localStorage. Delete them from any browser that still has them.
+const LEGACY_KEYS = ['authUsers', 'authUser', 'orders'];
 
-function readJson(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
+function removeLegacyData() {
+  for (const key of LEGACY_KEYS) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // Storage can be blocked (private mode); nothing to clean up then.
+    }
   }
 }
 
-function writeJson(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
+// The session lives on the server behind an HttpOnly cookie. The browser only
+// keeps the signed-in user's public profile in memory: no passwords, no tokens.
 export function AuthProvider({ children }) {
-  const [users, setUsers] = useState(() => readJson(USER_LIST_KEY, []));
-  const [user, setUser] = useState(() => readJson(CURRENT_USER_KEY, null));
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    writeJson(USER_LIST_KEY, users);
-  }, [users]);
+    removeLegacyData();
 
-  useEffect(() => {
-    if (user) writeJson(CURRENT_USER_KEY, user);
-    else localStorage.removeItem(CURRENT_USER_KEY);
-  }, [user]);
-
-  const signup = ({ username, email, password }) => {
-    const u = username.trim();
-    const e = email.trim().toLowerCase();
-    const p = password;
-
-    if (u.length < 3)
-      return { ok: false, message: 'Username must be at least 3 characters.' };
-    if (!e.includes('@'))
-      return { ok: false, message: 'Please enter a valid email.' };
-    if (p.length < 6)
-      return { ok: false, message: 'Password must be at least 6 characters.' };
-
-    const usernameTaken = users.some(
-      (x) => x.username.toLowerCase() === u.toLowerCase()
-    );
-    if (usernameTaken)
-      return { ok: false, message: 'Username is already taken.' };
-
-    const emailTaken = users.some((x) => x.email === e);
-    if (emailTaken)
-      return {
-        ok: false,
-        message: 'An account with this email already exists.',
-      };
-
-    const newUser = {
-      id: crypto.randomUUID(),
-      username: u,
-      email: e,
-      password: p,
+    let active = true;
+    authAPI
+      .fetchCurrentUser()
+      .then((current) => active && setUser(current))
+      .catch(() => active && setUser(null))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
     };
-    setUsers((prev) => [...prev, newUser]);
+  }, []);
 
-    // auto login after signup 
-    setUser({
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-    });
+  const signup = useCallback(async ({ displayName, email, password }) => {
+    try {
+      setUser(await authAPI.register({ displayName, email, password }));
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, message: errorMessage(error, 'Sign up failed.') };
+    }
+  }, []);
 
-    return { ok: true };
-  };
+  const login = useCallback(async ({ email, password }) => {
+    try {
+      setUser(await authAPI.login({ email, password }));
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, message: errorMessage(error, 'Login failed.') };
+    }
+  }, []);
 
-  const login = ({ identifier, password }) => {
-    const ident = identifier.trim().toLowerCase();
-    const p = password;
-
-    const found = users.find(
-      (x) => x.email === ident || x.username.toLowerCase() === ident
-    );
-
-    if (!found) return { ok: false, message: 'Account not found.' };
-    if (found.password !== p)
-      return { ok: false, message: 'Incorrect password.' };
-
-    setUser({ id: found.id, username: found.username, email: found.email });
-    return { ok: true };
-  };
-
-  const logout = () => setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await authAPI.logout();
+    } finally {
+      setUser(null);
+    }
+  }, []);
 
   const value = useMemo(
-    () => ({ user, users, signup, login, logout }),
-    [user, users]
+    () => ({ user, loading, signup, login, logout }),
+    [user, loading, signup, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
