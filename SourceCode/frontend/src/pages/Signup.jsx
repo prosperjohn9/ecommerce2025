@@ -15,26 +15,34 @@ function Signup() {
   const { signup } = useAuth();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
+  // Same rules the server enforces (RegisterRequest.java).
   const canSubmit = useMemo(() => {
+    const name = displayName.trim();
     return (
-      username.trim().length >= 3 &&
+      name.length >= 3 &&
+      name.length <= 50 &&
       email.trim().includes('@') &&
-      password.length >= 6 &&
-      confirm === password
+      password.length >= 12 &&
+      password.length <= 128 &&
+      confirm === password &&
+      !submitting
     );
-  }, [username, email, password, confirm]);
+  }, [displayName, email, password, confirm, submitting]);
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
-    const res = signup({ username, email, password });
+    const res = await signup({ displayName, email, password });
+    setSubmitting(false);
     if (!res.ok) {
       setError(res.message || 'Signup failed.');
       return;
@@ -50,7 +58,7 @@ function Signup() {
         </Typography>
 
         <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
-          Create a username for your store profile.
+          Create your store account.
         </Typography>
 
         {error && (
@@ -61,11 +69,12 @@ function Signup() {
 
         <Stack component='form' spacing={2} onSubmit={onSubmit}>
           <TextField
-            label='Username'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            label='Display name'
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            autoComplete='nickname'
             fullWidth
-            helperText='At least 3 characters'
+            helperText='3 to 50 characters, shown in the menu'
           />
 
           <TextField
@@ -84,7 +93,7 @@ function Signup() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete='new-password'
             fullWidth
-            helperText='At least 6 characters'
+            helperText='12 to 128 characters. A few random words work well.'
           />
 
           <TextField

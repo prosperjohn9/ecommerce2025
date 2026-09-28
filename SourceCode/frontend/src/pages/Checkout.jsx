@@ -12,6 +12,7 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -29,6 +30,8 @@ import { keyframes } from '@mui/system';
 
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { placeOrder } from '../api/orderAPI';
+import { errorMessage } from '../api/client';
 
 /* ---------------------------
    Confetti (lightweight CSS)
@@ -105,24 +108,24 @@ function Checkout() {
 
   const [errors, setErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const [orderInfo, setOrderInfo] = useState({ orderId: '', placedAt: '' });
+  // The order as the server saved it (ids, prices and total are the server's).
+  const [placedOrder, setPlacedOrder] = useState(null);
   const [expandedSummary, setExpandedSummary] = useState(false);
 
   // Countdown (8 seconds)
   const COUNTDOWN_START = 8;
   const [countdown, setCountdown] = useState(COUNTDOWN_START);
 
-  // Guards (IMPORTANT: don’t redirect while modal is open)
+  // Guard: nothing to check out (IMPORTANT: don’t redirect while modal is open).
+  // Sign-in is enforced by RequireAuth in App.js.
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
     if (!confirmOpen && cartItems.length === 0) {
       navigate('/');
     }
-  }, [cartItems.length, user, confirmOpen, navigate]);
+  }, [cartItems.length, confirmOpen, navigate]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -140,32 +143,34 @@ function Checkout() {
     return Object.keys(next).length === 0;
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!validate()) return;
 
-    const id = `CBU-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-    const ts = new Date().toLocaleString();
+    setSubmitError('');
+    setSubmitting(true);
+    try {
+      // Only product ids and quantities are sent. The server prices the order.
+      const order = await placeOrder({
+        items: cartItems.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+        })),
+        shipping: form,
+        paymentMethod,
+      });
 
-    // Save order to localStorage (order history)
-    const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    savedOrders.push({
-      id,
-      placedAt: ts,
-      userEmail: user?.email || '',
-      username: user?.username || user?.name || '',
-      paymentMethod,
-      shipping: { ...form },
-      items: cartItems,
-      total: Number(cartTotal),
-    });
-    localStorage.setItem('orders', JSON.stringify(savedOrders));
-
-    setOrderInfo({ orderId: id, placedAt: ts });
-    setExpandedSummary(false);
-    setCountdown(COUNTDOWN_START);
-    setConfirmOpen(true);
-
-    // Do NOT clear cart here
+      setPlacedOrder(order);
+      setExpandedSummary(false);
+      setCountdown(COUNTDOWN_START);
+      setConfirmOpen(true);
+      // Do NOT clear cart here
+    } catch (error) {
+      setSubmitError(
+        errorMessage(error, 'Could not place the order. Please try again.')
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Close should clear cart + go to Cart page
@@ -328,12 +333,19 @@ function Checkout() {
 
         {/* Place Order */}
         <Box>
+          {submitError && (
+            <Alert severity='error' sx={{ mb: 2 }}>
+              {submitError}
+            </Alert>
+          )}
+
           <Button
             variant='contained'
             size='large'
             fullWidth
+            disabled={submitting}
             onClick={handlePlaceOrder}>
-            Place Order
+            {submitting ? 'Placing order…' : 'Place Order'}
           </Button>
 
           <Typography
@@ -363,8 +375,8 @@ function Checkout() {
 
           <DialogContent>
             <Typography sx={{ mb: 1.5 }}>
-              Thanks, <strong>{user?.username || user?.name}</strong> — your
-              order has been placed successfully.
+              Thanks, <strong>{user?.displayName}</strong> — your order has
+              been placed successfully.
             </Typography>
 
             <Paper variant='outlined' sx={{ p: 2, borderRadius: 3, mb: 2 }}>
@@ -372,14 +384,17 @@ function Checkout() {
                 <Typography variant='body2' color='text.secondary'>
                   Order ID
                 </Typography>
-                <Typography fontWeight={900}>{orderInfo.orderId}</Typography>
+                <Typography fontWeight={900}>#{placedOrder?.id}</Typography>
 
                 <Divider sx={{ my: 1 }} />
 
                 <Typography variant='body2' color='text.secondary'>
                   Placed at
                 </Typography>
-                <Typography fontWeight={700}>{orderInfo.placedAt}</Typography>
+                <Typography fontWeight={700}>
+                  {placedOrder &&
+                    new Date(placedOrder.createdAt).toLocaleString()}
+                </Typography>
 
                 <Divider sx={{ my: 1 }} />
 
@@ -387,7 +402,7 @@ function Checkout() {
                   Total
                 </Typography>
                 <Typography fontWeight={900}>
-                  ${Number(cartTotal).toFixed(2)}
+                  ${Number(placedOrder?.total).toFixed(2)}
                 </Typography>
 
                 <Typography
@@ -396,7 +411,9 @@ function Checkout() {
                   sx={{ mt: 1 }}>
                   Payment method:{' '}
                   <strong>
-                    {paymentMethod === 'CARD' ? 'Card' : 'Cash on Delivery'}
+                    {placedOrder?.paymentMethod === 'COD'
+                      ? 'Cash on Delivery'
+                      : 'Card'}
                   </strong>
                 </Typography>
               </Stack>
@@ -412,18 +429,18 @@ function Checkout() {
               </AccordionSummary>
               <AccordionDetails>
                 <Stack spacing={1}>
-                  {cartItems.map((item) => (
+                  {(placedOrder?.items || []).map((item) => (
                     <Stack
-                      key={item.id}
+                      key={item.productId}
                       direction='row'
                       justifyContent='space-between'
                       alignItems='flex-start'
                       spacing={2}>
                       <Typography variant='body2' sx={{ flex: 1 }}>
-                        {item.name} × {item.quantity}
+                        {item.productName} × {item.quantity}
                       </Typography>
                       <Typography variant='body2' fontWeight={800}>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${Number(item.lineTotal).toFixed(2)}
                       </Typography>
                     </Stack>
                   ))}
@@ -431,7 +448,7 @@ function Checkout() {
                   <Stack direction='row' justifyContent='space-between'>
                     <Typography fontWeight={900}>Total</Typography>
                     <Typography fontWeight={900}>
-                      ${Number(cartTotal).toFixed(2)}
+                      ${Number(placedOrder?.total).toFixed(2)}
                     </Typography>
                   </Stack>
                 </Stack>

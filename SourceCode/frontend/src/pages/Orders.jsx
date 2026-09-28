@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -9,36 +9,34 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { useAuth } from '../context/AuthContext';
+import { fetchMyOrders } from '../api/orderAPI';
+import { errorMessage } from '../api/client';
 
+// Sign-in is enforced by RequireAuth in App.js. The server returns only the
+// signed-in user's orders, newest first.
 function Orders() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!user) navigate('/login');
-  }, [user, navigate]);
-
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('orders') || '[]');
-    setOrders(saved);
+    let active = true;
+    fetchMyOrders()
+      .then((data) => active && setOrders(data))
+      .catch((err) => active && setError(errorMessage(err, 'Could not load your orders.')))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
   }, []);
-
-  const myOrders = useMemo(() => {
-    if (!user?.email) return [];
-    return orders
-      .filter((o) => o.userEmail === user.email)
-      .slice()
-      .reverse();
-  }, [orders, user]);
 
   const paymentLabel = (m) => (m === 'COD' ? 'Cash on Delivery' : 'Card');
 
@@ -59,7 +57,13 @@ function Orders() {
         </Button>
       </Stack>
 
-      {myOrders.length === 0 ? (
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <CircularProgress aria-label='Loading orders' />
+        </Box>
+      ) : error ? (
+        <Alert severity='error'>{error}</Alert>
+      ) : orders.length === 0 ? (
         <Paper sx={{ p: 3 }}>
           <Typography sx={{ mb: 1 }}>You don’t have any orders yet.</Typography>
           <Button component={RouterLink} to='/' variant='contained'>
@@ -68,7 +72,7 @@ function Orders() {
         </Paper>
       ) : (
         <Stack spacing={2}>
-          {myOrders.map((o) => (
+          {orders.map((o) => (
             <Paper key={o.id} sx={{ p: 2.5, borderRadius: 3 }}>
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
@@ -76,9 +80,9 @@ function Orders() {
                 justifyContent='space-between'
                 alignItems={{ xs: 'flex-start', sm: 'center' }}>
                 <Box>
-                  <Typography sx={{ fontWeight: 900 }}>{o.id}</Typography>
+                  <Typography sx={{ fontWeight: 900 }}>Order #{o.id}</Typography>
                   <Typography variant='body2' color='text.secondary'>
-                    Placed: {o.placedAt}
+                    Placed: {new Date(o.createdAt).toLocaleString()}
                   </Typography>
                 </Box>
 
@@ -135,16 +139,16 @@ function Orders() {
                   <Stack spacing={1}>
                     {(o.items || []).map((item) => (
                       <Stack
-                        key={`${item.id}-${item.name}`}
+                        key={item.productId}
                         direction='row'
                         justifyContent='space-between'
                         spacing={2}
                         alignItems='flex-start'>
                         <Typography variant='body2' sx={{ flex: 1 }}>
-                          {item.name} × {item.quantity}
+                          {item.productName} × {item.quantity}
                         </Typography>
                         <Typography variant='body2' sx={{ fontWeight: 900 }}>
-                          ${(Number(item.price) * item.quantity).toFixed(2)}
+                          ${Number(item.lineTotal).toFixed(2)}
                         </Typography>
                       </Stack>
                     ))}

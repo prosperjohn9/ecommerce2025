@@ -1,5 +1,5 @@
--- Auto-generated from images on 2025-12-27T19:15:22
-TRUNCATE TABLE product RESTART IDENTITY CASCADE;
+-- Product seed. Moved from data.sql (generated 2025-12-27T19:15:22, then hand-edited).
+-- Flyway runs this once per database. Add product changes as a new migration.
 
 INSERT INTO product (name, price, category, description, image_url, brand, color, stock, size) VALUES ('Longchamp Bags (Black)', 89.99, 'BAG', 'Premium bag from the Longchamp Bags collection.', '/images/LongChamp_bags/LongChamp_Black.jpeg', 'Longchamp Bags', 'Black', 15, NULL);
 INSERT INTO product (name, price, category, description, image_url, brand, color, stock, size) VALUES ('Longchamp Bags (Brown)', 89.99, 'BAG', 'Premium bag from the Longchamp Bags collection.', '/images/LongChamp_bags/LongChamp_Brown.jpeg', 'Longchamp Bags', 'Brown', 15, NULL);

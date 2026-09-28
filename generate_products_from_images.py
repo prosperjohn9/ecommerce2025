@@ -3,7 +3,10 @@ import re
 from datetime import datetime
 
 IMAGES_DIR = Path("SourceCode/frontend/public/images")
-OUT_FILE = Path("SourceCode/backend/src/main/resources/data.sql")
+# Flyway migration: it runs once per database, and editing it after it has run makes
+# Flyway refuse to start. So this script only writes it when it does not exist yet.
+# Put later product changes in a new migration instead.
+OUT_FILE = Path("SourceCode/backend/src/main/resources/db/migration/V2__seed_products.sql")
 
 DEFAULT_STOCK = 15
 DEFAULT_SIZE = None  
@@ -63,10 +66,13 @@ def sql_nullable_str(value):
 def main():
     if not IMAGES_DIR.exists():
         raise SystemExit(f"Images folder not found: {IMAGES_DIR}")
+    if OUT_FILE.exists():
+        raise SystemExit(f"{OUT_FILE} already exists. It is a Flyway migration; "
+                         "write product changes as a new migration instead.")
 
     rows = []
     rows.append(f"-- Auto-generated from images on {datetime.now().isoformat(timespec='seconds')}")
-    rows.append("TRUNCATE TABLE product RESTART IDENTITY CASCADE;")
+    rows.append("-- by generate_products_from_images.py. Flyway runs this once per database.")
     rows.append("")
 
     count = 0

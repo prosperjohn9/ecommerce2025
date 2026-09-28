@@ -43,7 +43,9 @@ function Navbar() {
   const navigate = useNavigate();
   const { cartCount } = useCart();
   const { mode, toggleMode } = useThemeMode();
-  const { user, logout } = useAuth();
+  // While the /auth/me check runs, show neither Login/Sign up nor Logout,
+  // so a signed-in user never sees the signed-out buttons flash on refresh.
+  const { user, loading: authLoading, logout } = useAuth();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -64,11 +66,12 @@ function Navbar() {
   const handleLogoutClick = () => setLogoutOpen(true);
   const handleLogoutCancel = () => setLogoutOpen(false);
 
-  const handleLogoutConfirm = () => {
+  const handleLogoutConfirm = async () => {
     setLogoutOpen(false);
     closeDrawer();
-    logout();
+    // Leave protected pages first, or their guard would send us to /login.
     navigate('/');
+    await logout();
   };
 
   return (
@@ -138,7 +141,7 @@ function Navbar() {
               </Button>
             )}
 
-            {user ? (
+            {authLoading ? null : user ? (
               <>
                 <Typography
                   variant='body2'
@@ -147,7 +150,7 @@ function Navbar() {
                     mx: 1,
                     display: { xs: 'none', sm: 'block' },
                   }}>
-                  Hi, {user.username}
+                  Hi, {user.displayName}
                 </Typography>
 
                 <Button
@@ -271,7 +274,7 @@ function Navbar() {
             justifyContent='space-between'
             alignItems='center'>
             <Typography sx={{ fontWeight: 900 }}>
-              {user ? `Hi, ${user.username}` : 'Menu'}
+              {user ? `Hi, ${user.displayName}` : 'Menu'}
             </Typography>
             <Button
               onClick={closeDrawer}
@@ -326,7 +329,7 @@ function Navbar() {
 
             <Divider sx={{ my: 1 }} />
 
-            {user ? (
+            {authLoading ? null : user ? (
               <ListItemButton
                 onClick={() => {
                   closeDrawer();
