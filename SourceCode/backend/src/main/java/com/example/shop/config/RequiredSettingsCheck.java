@@ -17,10 +17,14 @@ import java.util.List;
 @Component
 public class RequiredSettingsCheck implements BeanFactoryPostProcessor, EnvironmentAware {
 
-    private static final List<String> REQUIRED = List.of(
-            "spring.datasource.url",
-            "spring.datasource.username",
-            "spring.datasource.password");
+    private record Setting(String property, String envVar) {
+    }
+
+    private static final List<Setting> REQUIRED = List.of(
+            new Setting("spring.datasource.url", "DB_URL"),
+            new Setting("spring.datasource.username", "DB_USERNAME"),
+            new Setting("spring.datasource.password", "DB_PASSWORD"),
+            new Setting("app.cors.allowed-origins", "FRONTEND_ORIGIN"));
 
     private Environment environment;
 
@@ -31,13 +35,13 @@ public class RequiredSettingsCheck implements BeanFactoryPostProcessor, Environm
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-        for (String key : REQUIRED) {
+        for (Setting setting : REQUIRED) {
             try {
-                environment.getRequiredProperty(key);
+                environment.getRequiredProperty(setting.property());
             } catch (IllegalArgumentException | IllegalStateException e) {
-                throw new IllegalStateException("Missing required setting " + key + ". "
-                        + "Set DB_URL, DB_USERNAME and DB_PASSWORD as environment variables "
-                        + "or in SourceCode/backend/.env (see .env.example).", e);
+                throw new IllegalStateException("Missing required setting " + setting.property()
+                        + " (environment variable " + setting.envVar() + "). "
+                        + "Set it as an environment variable or in SourceCode/backend/.env (see .env.example).", e);
             }
         }
     }

@@ -11,11 +11,12 @@ class RequiredSettingsCheckTest {
             .withUserConfiguration(RequiredSettingsCheck.class);
 
     @Test
-    void startsWhenAllDatabaseSettingsResolve() {
+    void startsWhenAllRequiredSettingsResolve() {
         runner.withPropertyValues(
                         "spring.datasource.url=jdbc:postgresql://localhost:5432/test",
                         "spring.datasource.username=user",
-                        "spring.datasource.password=secret")
+                        "spring.datasource.password=secret",
+                        "app.cors.allowed-origins=http://localhost:3000")
                 .run(context -> assertThat(context).hasNotFailed());
     }
 
@@ -24,7 +25,8 @@ class RequiredSettingsCheckTest {
         runner.withPropertyValues(
                         "spring.datasource.url=jdbc:postgresql://localhost:5432/test",
                         "spring.datasource.username=user",
-                        "spring.datasource.password=${SHOP_TEST_UNSET_VARIABLE}")
+                        "spring.datasource.password=${SHOP_TEST_UNSET_VARIABLE}",
+                        "app.cors.allowed-origins=http://localhost:3000")
                 .run(context -> assertThat(context)
                         .hasFailed()
                         .getFailure()
@@ -33,13 +35,27 @@ class RequiredSettingsCheckTest {
     }
 
     @Test
-    void failsWhenASettingIsAbsent() {
+    void failsWhenDatabasePasswordIsAbsent() {
         runner.withPropertyValues(
                         "spring.datasource.url=jdbc:postgresql://localhost:5432/test",
-                        "spring.datasource.username=user")
+                        "spring.datasource.username=user",
+                        "app.cors.allowed-origins=http://localhost:3000")
                 .run(context -> assertThat(context)
                         .hasFailed()
                         .getFailure()
-                        .hasMessageContaining("spring.datasource.password"));
+                        .hasMessageContaining("spring.datasource.password")
+                        .hasMessageContaining("DB_PASSWORD"));
+    }
+
+    @Test
+    void failsWhenFrontendOriginIsAbsent() {
+        runner.withPropertyValues(
+                        "spring.datasource.url=jdbc:postgresql://localhost:5432/test",
+                        "spring.datasource.username=user",
+                        "spring.datasource.password=secret")
+                .run(context -> assertThat(context)
+                        .hasFailed()
+                        .getFailure()
+                        .hasMessageContaining("FRONTEND_ORIGIN"));
     }
 }
